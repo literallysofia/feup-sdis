@@ -25,13 +25,25 @@ public class Client {
         DatagramSocket socket = new DatagramSocket();
 
         //Criação Datagram Packet
-        InetAddress inetAdress = InetAddress.getByName(host_name);
+        InetAddress inetAddress = InetAddress.getByName(host_name);
         String messageString = oper + " " + plate_number + " " + owner_name;
         byte[] message = messageString.getBytes();
-        DatagramPacket packet = new DatagramPacket(message, message.length, inetAdress, port_number);
+        DatagramPacket packet = new DatagramPacket(message, message.length, inetAddress, port_number);
 
         //Envio da mensagem
         socket.send(packet);
+
+        //Receção da Resposta
+        readResponse(socket);
+    }
+
+    public static void readResponse(DatagramSocket socket) throws IOException{
+        byte[] message = new byte[255];
+        DatagramPacket packet = new DatagramPacket(message, message.length);
+        socket.receive(packet);
+        String messageString = new String(message);
+
+        System.out.println(" > Response: "+ messageString);
     }
 
 }

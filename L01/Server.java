@@ -4,22 +4,26 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.io.IOException;
+import java.util.HashMap;
 
 public class Server {
+
+    static HashMap<String, String> platesHashMap = new HashMap<String,String>();
+
     public static void main(String args[]) throws SocketException, UnknownHostException, IOException {
         
         //Parse de Argumentos
         int port_number = Integer.parseInt(args[0]);
-        System.out.println(" > Port number: "+port_number);
+        System.out.println(" > Port number: "+port_number);        
 
         //Criação Datagram Socket
         DatagramSocket socket = new DatagramSocket(port_number);
 
         //Espera um pedido
-        waitRequest(socket);
+        waitRequest(socket, port_number);
     }
 
-    public static void waitRequest(DatagramSocket socket) throws IOException {
+    public static void waitRequest(DatagramSocket socket, int port_number) throws IOException {
 
         while(true){
             //Cronstrução do Packet
@@ -28,17 +32,17 @@ public class Server {
 
             //Receção do Packet
             socket.receive(packet);
-           
+
             //Processamento do pedido
             if(message.length != 0){
                 String messageString = new String(message);
-                System.out.println(" > Message Received: " + messageString);
+                //System.out.println(" > Message Received: " + messageString);
                 String[] messageArray = messageString.split(" ");
 
                 if(messageArray[0].equals("register")){
-                    processRegisterMessage(messageArray[1], messageArray[2]);
+                    processRegisterMessage(socket, port_number, messageArray[1], messageArray[2]);
                 }else if (messageArray[0]. equals("lookup")){
-                    processLookupMessage(messageArray[1]);
+                    processLookupMessage(socket, port_number, messageArray[1]);
                 }
 
             }
@@ -47,11 +51,48 @@ public class Server {
     }
 
 
-    public static void processRegisterMessage(String plate_number, String owner_name){
-         System.out.println(" REGISTER MESSAGE" + "\n" + " > Plate Number: "+ plate_number+ "\n" + " > Owner Name: " + owner_name);
+    public static void processRegisterMessage(DatagramSocket socket, int port_number, String plate_number, String owner_name) throws IOException{
+        System.out.println(" REGISTER MESSAGE" + "\n" + " > Plate Number: "+ plate_number+ "\n" + " > Owner Name: " + owner_name);
+        
+        int response;
+
+        if(platesHashMap.containsKey(plate_number)){
+            response=-1;
+        }else{
+            platesHashMap.put(plate_number, owner_name);
+            response=platesHashMap.size();
+        }
+
+        System.out.println(" > Response: " + response);
+
+        //Mandar a resposta
+        String responseString = String.valueOf(response);
+        byte[] responseByte = responseString.getBytes();
+        InetAddress inetAddress = InetAddress.getByName("localhost");
+        DatagramPacket packet = new DatagramPacket(responseByte, responseByte.length, inetAddress, port_number);
+        socket.send(packet);
     }
 
-    public static void processLookupMessage(String plate_number){
-         System.out.println(" LOOKUP MESSAGE" + "\n" + " > Plate Number: "+ plate_number);
+    public static void processLookupMessage(DatagramSocket socket, int port_number, String plate_number) throws IOException{
+        System.out.println(" LOOKUP MESSAGE" + "\n" + " > Plate Number: "+ plate_number);
+
+
+        String response;
+
+        if(platesHashMap.containsKey(plate_number)){
+            response = platesHashMap.get(plate_number);
+        }else{
+            response = "NOT_FOUND";
+        }
+
+        System.out.println(" > Response: " + response);
+        
+        //Mandar o resposta
+        byte[] responseByte = response.getBytes();
+        InetAddress inetAddress = InetAddress.getByName("localhost");
+        DatagramPacket packet = new DatagramPacket(responseByte, responseByte.length, inetAddress, port_number);
+        socket.send(packet);
+        
+         
     }
 }
