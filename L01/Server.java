@@ -20,18 +20,15 @@ public class Server {
         DatagramSocket socket = new DatagramSocket(port_number);
 
         //Espera um pedido
-        waitRequest(socket, port_number);
-    }
-
-    public static void waitRequest(DatagramSocket socket, int port_number) throws IOException {
-
-        while(true){
+          while(true){
             //Cronstrução do Packet
             byte[] message = new byte[255];
             DatagramPacket packet = new DatagramPacket(message, message.length);
-
+        
             //Receção do Packet
             socket.receive(packet);
+            InetAddress client_address = packet.getAddress();
+            int client_port = packet.getPort();
 
             //Processamento do pedido
             if(message.length != 0){
@@ -40,18 +37,17 @@ public class Server {
                 String[] messageArray = messageString.split(" ");
 
                 if(messageArray[0].equals("register")){
-                    processRegisterMessage(socket, port_number, messageArray[1], messageArray[2]);
+                    processRegisterMessage(socket, client_port, client_address, messageArray[1], messageArray[2]);
                 }else if (messageArray[0]. equals("lookup")){
-                    processLookupMessage(socket, port_number, messageArray[1]);
+                    processLookupMessage(socket, client_port, client_address, messageArray[1]);
                 }
 
             }
         }
-
     }
 
 
-    public static void processRegisterMessage(DatagramSocket socket, int port_number, String plate_number, String owner_name) throws IOException{
+    public static void processRegisterMessage(DatagramSocket socket, int client_port, InetAddress client_address, String plate_number, String owner_name) throws IOException{
         System.out.println(" REGISTER MESSAGE" + "\n" + " > Plate Number: "+ plate_number+ "\n" + " > Owner Name: " + owner_name);
         
         int response;
@@ -68,12 +64,11 @@ public class Server {
         //Mandar a resposta
         String responseString = String.valueOf(response);
         byte[] responseByte = responseString.getBytes();
-        InetAddress inetAddress = InetAddress.getByName("localhost");
-        DatagramPacket packet = new DatagramPacket(responseByte, responseByte.length, inetAddress, port_number);
+        DatagramPacket packet = new DatagramPacket(responseByte, responseByte.length, client_address, client_port);
         socket.send(packet);
     }
 
-    public static void processLookupMessage(DatagramSocket socket, int port_number, String plate_number) throws IOException{
+    public static void processLookupMessage(DatagramSocket socket,  int client_port, InetAddress client_address, String plate_number) throws IOException{
         System.out.println(" LOOKUP MESSAGE" + "\n" + " > Plate Number: "+ plate_number);
 
 
@@ -89,8 +84,8 @@ public class Server {
         
         //Mandar o resposta
         byte[] responseByte = response.getBytes();
-        InetAddress inetAddress = InetAddress.getByName("localhost");
-        DatagramPacket packet = new DatagramPacket(responseByte, responseByte.length, inetAddress, port_number);
+
+        DatagramPacket packet = new DatagramPacket(responseByte, responseByte.length, client_address, client_port);
         socket.send(packet);
         
          
