@@ -1,5 +1,3 @@
-//java Server 8080
-
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.DatagramPacket;

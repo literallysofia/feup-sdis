@@ -1,5 +1,3 @@
-//java Client localhost 8080 register 11-22-33 julieta
-
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.DatagramPacket;
