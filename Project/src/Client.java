@@ -35,7 +35,6 @@
  * intended for use in the design, construction, operation or
  * maintenance of any nuclear facility.
  */
-package example.hello;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -48,7 +47,7 @@ public class Client {
 
         String host = (args.length < 1) ? null : args[0];
         try {
-            Registry registry = LocateRegistry.getRegistry(host);
+            Registry registry = LocateRegistry.getRegistry(1099);
             Hello stub = (Hello) registry.lookup("Hello");
             String response = stub.sayHello();
             System.out.println("response: " + response);
