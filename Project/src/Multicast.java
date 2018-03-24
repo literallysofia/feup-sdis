@@ -24,16 +24,16 @@ public class Multicast {
     public static void send() throws UnknownHostException, InterruptedException{
      
         // Open a new DatagramSocket, which will be used to send the data.
-        try (DatagramSocket serverSocket = new DatagramSocket()) {
+        try (MulticastSocket serverSocket = new MulticastSocket(PORT)) {
             for (int i = 0; i < 5; i++) {
-                String msg = "Sent message no " + i;
+                String msg = "MESSAGE " + i;
 
                 // Create a packet that will contain the data
                 // (in the form of bytes) and send it.
                 DatagramPacket msgPacket = new DatagramPacket(msg.getBytes(),msg.getBytes().length, address, PORT);
                 serverSocket.send(msgPacket);
      
-                System.out.println("Server sent packet with msg: " + msg);
+                System.out.println("Sent msg: " + msg);
                 Thread.sleep(500);
             }
         } catch (IOException ex) {
@@ -60,7 +60,7 @@ public class Multicast {
                 clientSocket.receive(msgPacket);
 
                 String msg = new String(buf, 0, buf.length);
-                System.out.println("Socket 1 received msg: " + msg);
+                System.out.println("Received msg: " + msg);
             }
         } catch (IOException ex) {
             ex.printStackTrace();

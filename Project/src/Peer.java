@@ -9,6 +9,8 @@ public class Peer implements RMIRemote {
 
     private int id;
     private static Multicast MC;
+    private static Multicast MDB;
+    private static Multicast MDR;
 
     public Peer() {
         try{
@@ -39,8 +41,9 @@ public class Peer implements RMIRemote {
             e.printStackTrace();
         }
 
-        while(true){
+        /*while(true){
             try{
+                //criar varias threas para cada tipo de multicast 
                 MC.receive();
             }
             catch (UnknownHostException e){
@@ -50,6 +53,15 @@ public class Peer implements RMIRemote {
                 e.printStackTrace();
             }
             
-        }
+        }*/
+
+        Thread threadMC = new Thread(new ChannelListener(MC));
+        threadMC.start();
+
+        Thread threadMDB = new Thread(new ChannelListener(MDB));
+        threadMDB.start();
+
+        Thread threadMDR = new Thread(new ChannelListener(MDR));
+        threadMDR.start();
     }
 }
