@@ -21,7 +21,7 @@ public class Multicast {
        }
     }
 
-    public static void send() throws UnknownHostException, InterruptedException{
+    /*public static void send() throws UnknownHostException, InterruptedException{
      
         // Open a new DatagramSocket, which will be used to send the data.
         try (MulticastSocket serverSocket = new MulticastSocket(PORT)) {
@@ -36,6 +36,34 @@ public class Multicast {
                 System.out.println("Sent msg: " + msg);
                 Thread.sleep(500);
             }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }*/
+
+    public static void sendMessage(String msg) throws UnknownHostException, InterruptedException{
+     
+        // Open a new DatagramSocket, which will be used to send the data.
+        try (MulticastSocket serverSocket = new MulticastSocket(PORT)) {
+            /*for (int i = 0; i < 5; i++) {
+                String msg = "MESSAGE " + i;
+
+                // Create a packet that will contain the data
+                // (in the form of bytes) and send it.
+                DatagramPacket msgPacket = new DatagramPacket(msg.getBytes(),msg.getBytes().length, address, PORT);
+                serverSocket.send(msgPacket);
+     
+                System.out.println("Sent msg: " + msg);
+                Thread.sleep(500);
+            }*/
+
+            // Create a packet that will contain the data
+            // (in the form of bytes) and send it.
+            DatagramPacket msgPacket = new DatagramPacket(msg.getBytes(),msg.getBytes().length, address, PORT);
+            serverSocket.send(msgPacket);
+     
+            System.out.println("Sent msg: " + msg);
+
         } catch (IOException ex) {
             ex.printStackTrace();
         }

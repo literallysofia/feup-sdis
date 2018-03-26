@@ -20,10 +20,6 @@ public class Peer implements RMIRemote {
         }
     }
 
-    public void sendMessage() throws UnknownHostException, InterruptedException {
-        MC.send();
-    }
-
     public static void main(String args[]) throws UnknownHostException{
 
         try {
@@ -41,27 +37,42 @@ public class Peer implements RMIRemote {
             e.printStackTrace();
         }
 
-        /*while(true){
-            try{
-                //criar varias threas para cada tipo de multicast 
-                MC.receive();
-            }
-            catch (UnknownHostException e){
-                e.printStackTrace();
-            }
-            catch (InterruptedException e){
-                e.printStackTrace();
-            }
-            
-        }*/
-
-        Thread threadMC = new Thread(new ChannelListener(MC));
+        Thread threadMC = new Thread(new Listener(MC));
         threadMC.start();
 
-        Thread threadMDB = new Thread(new ChannelListener(MDB));
+        Thread threadMDB = new Thread(new Listener(MDB));
         threadMDB.start();
 
-        Thread threadMDR = new Thread(new ChannelListener(MDR));
+        Thread threadMDR = new Thread(new Listener(MDR));
         threadMDR.start();
+    }
+
+
+    public void backup(String filepath, int replicationDegree) throws RemoteException{
+        
+        try{      
+            MDB.sendMessage("BACKUP   Filepath: "+ filepath + "  Replication Degree: " + replicationDegree);
+        }catch (UnknownHostException e){
+            e.printStackTrace();
+        }
+        catch (InterruptedException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void restore(String filepath) throws RemoteException{        
+
+    }
+
+    public void delete(String filepath) throws RemoteException{        
+
+    }
+
+    public void reclaim(int diskSpaceToReclaim) throws RemoteException{        
+
+    }
+
+    public void state() throws RemoteException{        
+
     }
 }
