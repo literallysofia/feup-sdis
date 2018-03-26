@@ -34,7 +34,6 @@ public class App {
 
                 filePath = args[2];
                 replicationDegree = Integer.parseInt(args[3]);
-                System.out.println("WELELELELLE");
                 peer.backup(filePath, replicationDegree);
             }
             else if(args[1].equals("RESTORE")){

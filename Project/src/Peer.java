@@ -4,6 +4,8 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.net.UnknownHostException;
 import java.net.MulticastSocket;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 
 public class Peer implements RMIRemote {
 
@@ -11,10 +13,15 @@ public class Peer implements RMIRemote {
     private static Multicast MC;
     private static Multicast MDB;
     private static Multicast MDR;
+    private static ExecutorService exec;
 
     public Peer() {
+        exec = Executors.newFixedThreadPool(5);
         try{
-            this.MC = new Multicast();
+            this.MC = new Multicast(8080);
+            this.MDB = new Multicast(8081);
+            this.MDR = new Multicast(8082);
+
         }catch (UnknownHostException e){
             e.printStackTrace();
         }
@@ -37,21 +44,16 @@ public class Peer implements RMIRemote {
             e.printStackTrace();
         }
 
-        Thread threadMC = new Thread(new Listener(MC));
-        threadMC.start();
-
-        Thread threadMDB = new Thread(new Listener(MDB));
-        threadMDB.start();
-
-        Thread threadMDR = new Thread(new Listener(MDR));
-        threadMDR.start();
+        exec.execute(MC);
+        exec.execute(MDB);
+        exec.execute(MDR);
     }
 
 
     public void backup(String filepath, int replicationDegree) throws RemoteException{
         
         try{      
-            MDB.sendMessage("BACKUP   Filepath: "+ filepath + "  Replication Degree: " + replicationDegree);
+            MDB.sendMessage("   Filepath: "+ filepath + "  Replication Degree: " + replicationDegree);
         }catch (UnknownHostException e){
             e.printStackTrace();
         }
