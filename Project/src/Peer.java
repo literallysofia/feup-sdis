@@ -1,27 +1,28 @@
+import java.io.*;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.net.UnknownHostException;
 import java.net.MulticastSocket;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 
 public class Peer implements RMIRemote {
 
     private int id;
-    private static Multicast MC;
-    private static Multicast MDB;
-    private static Multicast MDR;
+    private static ChannelControl MC;
+    private static ChannelBackup MDB;
+    private static ChannelRestore MDR;
     private static ExecutorService exec;
 
     public Peer() {
         exec = Executors.newFixedThreadPool(5);
         try{
-            this.MC = new Multicast(8080);
-            this.MDB = new Multicast(8081);
-            this.MDR = new Multicast(8082);
-
+            MC = new ChannelControl();
+            MDB = new ChannelBackup();
+            MDR = new ChannelRestore();
         }catch (UnknownHostException e){
             e.printStackTrace();
         }
@@ -51,13 +52,14 @@ public class Peer implements RMIRemote {
 
 
     public void backup(String filepath, int replicationDegree) throws RemoteException{
-        
-        try{      
-            MDB.sendMessage("   Filepath: "+ filepath + "  Replication Degree: " + replicationDegree);
-        }catch (UnknownHostException e){
-            e.printStackTrace();
-        }
-        catch (InterruptedException e){
+        try{
+            byte[] chunks = {(byte)100, (byte)200,(byte)300,(byte)400};
+
+            for(int i = 0; i < chunks.length; i++){
+                String message = "PUTCHUNK " + "1.0 " + " 3 " + this.id + " " + i + " " + chunks[i];
+                MDB.sendMessage(message);
+            }
+        }catch (UnknownHostException | InterruptedException e){
             e.printStackTrace();
         }
     }
@@ -74,7 +76,20 @@ public class Peer implements RMIRemote {
 
     }
 
-    public void state() throws RemoteException{        
+    public void state() throws RemoteException {
 
     }
+
+    public void manageReceivedControlMessages(String msg){
+
+    }
+
+    public void manageReceivedBackupMessages(String msg){
+
+    }
+
+    public void manageReceivedRestoreMessages(String msg){
+
+    }
+
 }
