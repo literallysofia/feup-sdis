@@ -2,13 +2,11 @@ import java.io.IOException;
 import java.net.*;
 
 public class ChannelRestore implements Runnable{
-    final static String INET_ADDR = "224.0.0.17";
-    static int PORT = 8003;
-    static InetAddress address;
-    static MulticastSocket receiverSocket;
+    private final String INET_ADDR = "224.0.0.17";
+    private int PORT = 8003;
+    private InetAddress address;
 
-
-    public ChannelRestore() throws UnknownHostException {
+    public ChannelRestore() {
         //Get the address that we are going to connect to.
         try{
             address = InetAddress.getByName(INET_ADDR);
@@ -20,7 +18,7 @@ public class ChannelRestore implements Runnable{
     }
 
 
-    public static void sendMessage(String msg) throws UnknownHostException, InterruptedException{
+    public void sendMessage(String msg) {
 
         // Open a new DatagramSocket, which will be used to send the data.
         try (DatagramSocket senderSocket = new DatagramSocket()) {
@@ -49,7 +47,7 @@ public class ChannelRestore implements Runnable{
         try{
             //Joint the Multicast group.
 
-            receiverSocket = new MulticastSocket(PORT);
+            MulticastSocket receiverSocket = new MulticastSocket(PORT);
 
             receiverSocket.joinGroup(address);
 
@@ -60,6 +58,9 @@ public class ChannelRestore implements Runnable{
 
                 String msg = new String(buf, 0, buf.length);
                 System.out.println("Received msg: " + msg);
+
+                ManageReceivedMessage manageMessage = new ManageReceivedMessage(msg);
+                Peer.getExec().execute(manageMessage);
             }
         } catch (IOException ex) {
             ex.printStackTrace();

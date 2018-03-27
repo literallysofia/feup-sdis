@@ -2,14 +2,12 @@ import java.io.IOException;
 import java.net.*;
 
 public class ChannelControl implements Runnable {
-
-    final static String INET_ADDR = "224.0.0.15";
-    static int PORT = 8001;
-    static InetAddress address;
-    static MulticastSocket receiverSocket;
+    private final String INET_ADDR = "224.0.0.15";
+    private int PORT = 8001;
+    private InetAddress address;
 
 
-    public ChannelControl() throws UnknownHostException {
+    public ChannelControl(){
         //Get the address that we are going to connect to.
         try{
             address = InetAddress.getByName(INET_ADDR);
@@ -21,7 +19,7 @@ public class ChannelControl implements Runnable {
     }
 
 
-    public static void sendMessage(String msg) throws UnknownHostException, InterruptedException{
+    public void sendMessage(String msg){
 
         // Open a new DatagramSocket, which will be used to send the data.
         try (DatagramSocket senderSocket = new DatagramSocket()) {
@@ -50,7 +48,7 @@ public class ChannelControl implements Runnable {
         try{
             //Joint the Multicast group.
 
-            receiverSocket = new MulticastSocket(PORT);
+            MulticastSocket receiverSocket = new MulticastSocket(PORT);
 
             receiverSocket.joinGroup(address);
 
@@ -61,6 +59,9 @@ public class ChannelControl implements Runnable {
 
                 String msg = new String(buf, 0, buf.length);
                 System.out.println("Received msg: " + msg);
+
+                ManageReceivedMessage manageMessage = new ManageReceivedMessage(msg);
+                Peer.getExec().execute(manageMessage);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
