@@ -29,7 +29,7 @@ public class ChannelBackup implements Runnable {
             DatagramPacket msgPacket = new DatagramPacket(msg.getBytes(),msg.getBytes().length, address, PORT);
             senderSocket.send(msgPacket);
 
-            System.out.println("Sent msg: " + msg);
+            System.out.println("CHANNEL BACKUP Sent msg: " + msg);
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -57,9 +57,9 @@ public class ChannelBackup implements Runnable {
                 receiverSocket.receive(msgPacket);
 
                 String msg = new String(buf, 0, buf.length);
-                System.out.println("Received msg: " + msg);
+                System.out.println("CHANNEL BACKUP Received msg: " + msg);
 
-                ManageReceivedMessage manageMessage = new ManageReceivedMessage(msg);
+                ManageReceivedMessageThread manageMessage = new ManageReceivedMessageThread(msg);
                 Peer.getExec().execute(manageMessage);
             }
         } catch (IOException ex) {

@@ -1,14 +1,14 @@
-public class ManageReceivedMessage implements Runnable{
+public class ManageReceivedMessageThread implements Runnable{
 
     public String msg;
 
-    public ManageReceivedMessage(String msg) {
+    public ManageReceivedMessageThread(String msg) {
         this.msg=msg;
     }
 
     public void run(){
-        String trimmedMg = this.msg.trim();
-        String[] msgArray=trimmedMg.split(" ");
+        String trimmedMsg = this.msg.trim();
+        String[] msgArray=trimmedMsg.split(" ");
 
         switch(msgArray[0]){
             //CONTROL

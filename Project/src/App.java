@@ -19,7 +19,6 @@ public class App {
 
             Registry registry = LocateRegistry.getRegistry(1099);
             RMIRemote peer = (RMIRemote) registry.lookup(peerID);
-            //peer.sendMessage();
 
             String filePath;
             int diskSpaceToReclaim;
