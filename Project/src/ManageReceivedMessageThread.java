@@ -24,6 +24,7 @@ public class ManageReceivedMessageThread implements Runnable{
                 break;
             //BACKUP
             case "PUTCHUNK":
+                managePutchunk(trimmedMsg);
                 break;
            //RESTORE
             case "RESTORE":
@@ -32,6 +33,12 @@ public class ManageReceivedMessageThread implements Runnable{
                 break;
         }
     }
+
+    public void managePutchunk(String msg){
+        System.out.println("MANAGE PUTCHUNK");
+    }
+
+
 
 
 }

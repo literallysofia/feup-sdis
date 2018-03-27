@@ -37,9 +37,11 @@ public class FileInfo {
 
             int bytesAmount = 0;
             while ((bytesAmount = bis.read(buffer)) > 0) {
+                //bis.write(buffer, 0, bytesAmount);
                 chunkNr++;
                 Chunk chunk = new Chunk(chunkNr, buffer);
                 chunks.add(chunk);
+
 
                 /*String filePartName = String.format("%s-%03d.jpg", fileName, chunkNr++);
                 File newFile = new File(f.getParent(), filePartName);
