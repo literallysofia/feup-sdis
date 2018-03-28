@@ -23,6 +23,15 @@ public class PutchunkReceivedThread implements Runnable {
     public void run() {
         String key = fileId + "_" + chunkNr;
         if (!Peer.getStorage().getStoredOccurrences().containsKey(key) || Peer.getStorage().getStoredOccurrences().get(key) < replicationDegree) {
+
+            /*if (!Peer.getStorage().getStoredOccurrences().containsKey(key)){
+                System.out.println(chunkNr + " ENTROU");
+            }
+
+            if(Peer.getStorage().getStoredOccurrences().get(key) < replicationDegree){
+                System.out.println(chunkNr + " AR: " + Peer.getStorage().getStoredOccurrences().get(key));
+            }*/
+
             Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree);
             Peer.getStorage().getChunks().add(chunk);
 

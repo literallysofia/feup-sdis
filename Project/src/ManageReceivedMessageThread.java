@@ -79,8 +79,9 @@ public class ManageReceivedMessageThread implements Runnable {
         int senderId = Integer.parseInt(headerArray[2].trim());
         String fileId = headerArray[3].trim();
         int chunkNr = Integer.parseInt(headerArray[4].trim());
-        Peer.getStorage().incStoredChunk(fileId, chunkNr);
+
         if (Peer.getId() != senderId) {
+            Peer.getStorage().incStoredChunk(fileId, chunkNr);
             System.out.println("Received STORED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
         }
     }

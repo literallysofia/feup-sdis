@@ -45,9 +45,17 @@ public class Storage {
     public void incStoredChunk(String fileID, int chuckNr) {
         String key = fileID + '_' + chuckNr;
 
-        if (this.storedOccurrences.putIfAbsent(key, 1) == null) {
+        /*if (this.storedOccurrences.putIfAbsent(key, 1) != null) {
             int total = this.storedOccurrences.get(key);
             this.storedOccurrences.replace(key, total++);
+        }*/
+
+        if(this.storedOccurrences.containsKey(key)) {
+            int total = this.storedOccurrences.get(key) + 1;
+            this.storedOccurrences.replace(key, total);
+        }
+        else{
+            this.storedOccurrences.put(key, 1);
         }
     }
 
