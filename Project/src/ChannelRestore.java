@@ -31,7 +31,7 @@ public class ChannelRestore implements Runnable{
             DatagramPacket msgPacket = new DatagramPacket(msg,msg.length, address, PORT);
             senderSocket.send(msgPacket);
 
-            System.out.println("CHANNEL RESTORE Sent msg: " + msg);
+            //System.out.println("CHANNEL RESTORE Sent msg: " + msg);
 
         } catch (IOException ex) {
             ex.printStackTrace();
