@@ -21,32 +21,33 @@ public class PutchunkReceivedThread implements Runnable {
 
     @Override
     public void run() {
+            String key= fileId+"_"+chunkNr;
+            if(!Peer.getStorage().getStoredOccurrences().containsKey(key) || Peer.getStorage().getStoredOccurrences().get(key)<replicationDegree){
+                Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree);
+                Peer.getStorage().getChunks().add(chunk);
 
-            Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree);
-            Peer.getStorage().getChunks().add(chunk);
+                try {
+                    String filename = Peer.getId() + "/" +senderId + "_" + fileId+"_"+chunkNr;
 
-            try {
-                String filename = Peer.getId() + "/" +senderId + "_" + fileId+"_"+chunkNr;
-
-                File file = new File(filename);
-                if (!file.exists()) {
-                    file.getParentFile().mkdirs();
-                    file.createNewFile();
+                    File file = new File(filename);
+                    if (!file.exists()) {
+                        file.getParentFile().mkdirs();
+                        file.createNewFile();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                String header = "STORED " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr + "\r\n\r\n";
+                System.out.println("Sent " + header);
+                SendMessageThread sendThread = null;
+                try {
+                    sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MC");
+                    Peer.getExec().execute(sendThread);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
             }
 
-            String header = "STORED " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr + "\r\n\r\n";
 
-            System.out.println("Sent: " + header);
-
-            SendMessageThread sendThread = null;
-            try {
-                sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MC");
-                Peer.getExec().execute(sendThread);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
     }
 }

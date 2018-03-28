@@ -46,6 +46,7 @@ public class ManageReceivedMessageThread implements Runnable {
     }
 
     private void managePutchunk() {
+
         List<byte[]> headerAndBody = getHeaderAndBody();
         byte[] header = headerAndBody.get(0);
         byte[] body = headerAndBody.get(1);
@@ -62,7 +63,6 @@ public class ManageReceivedMessageThread implements Runnable {
 
         if(Peer.getId() != senderId) {
             Random random = new Random();
-            System.out.println("RANDOM: " + random);
             System.out.println("Received PUTCHUNK Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr + " replicationDegree: " + replicationDegree);
             Peer.getExec().schedule(new PutchunkReceivedThread(version, senderId, fileId, chunkNr, replicationDegree), random.nextInt(401), TimeUnit.MILLISECONDS);
         }
@@ -81,18 +81,16 @@ public class ManageReceivedMessageThread implements Runnable {
         int senderId = Integer.parseInt(headerArray[2].trim());
         String fileId = headerArray[3].trim();
         int chunkNr = Integer.parseInt(headerArray[4].trim());
-
         Peer.getStorage().incStoredChunk(fileId, chunkNr);
-
-        //TODO: isto está shady
-
-        System.out.println("Received STORED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
+        if(Peer.getId() != senderId) {
+            System.out.println("Received STORED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
+        }
     }
 
     private List<byte[]> getHeaderAndBody() {
 
         int i;
-        for (i = 0; i < this.msgBytes.length - 6; i++) {
+        for (i = 0; i < this.msgBytes.length - 4; i++) {
             if (this.msgBytes[i] == 0xD && this.msgBytes[i + 1] == 0xA && this.msgBytes[i + 2] == 0xD && this.msgBytes[i + 3] == 0xA) {
                 break;
             }

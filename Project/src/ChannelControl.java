@@ -30,8 +30,6 @@ public class ChannelControl implements Runnable {
             DatagramPacket msgPacket = new DatagramPacket(msg,msg.length, address, PORT);
             senderSocket.send(msgPacket);
 
-            System.out.println("CHANNEL CONTROL Sent msg: " + msg);
-
         } catch (IOException ex) {
             ex.printStackTrace();
         }

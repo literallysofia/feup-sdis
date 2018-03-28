@@ -31,8 +31,6 @@ public class ChannelBackup implements Runnable {
             DatagramPacket msgPacket = new DatagramPacket(msg,msg.length, address, PORT);
             senderSocket.send(msgPacket);
 
-            System.out.println("CHANNEL BACKUP Sent msg: " + msg);
-
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -58,6 +56,7 @@ public class ChannelBackup implements Runnable {
                 receiverSocket.receive(msgPacket);
 
                 byte[] bufferCopy = Arrays.copyOf(buf, msgPacket.getLength());
+                Peer.getExec().execute(new ManageReceivedMessageThread(bufferCopy));
             }
         } catch (IOException ex) {
             ex.printStackTrace();
