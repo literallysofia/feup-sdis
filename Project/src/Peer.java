@@ -7,19 +7,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class Peer implements RMIRemote {
 
-    private int id;
+    private static int id;
     private static ChannelControl MC;
     private static ChannelBackup MDB;
     private static ChannelRestore MDR;
-    private static ExecutorService exec;
+    private static ScheduledThreadPoolExecutor exec;
     private static Storage storage;
     private static ArrayList<FileData> files;
 
     public Peer() {
-        exec = Executors.newFixedThreadPool(50);
+        exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(50);
         MC = new ChannelControl();
         MDB = new ChannelBackup();
         MDR = new ChannelRestore();
@@ -27,7 +28,11 @@ public class Peer implements RMIRemote {
         files = new ArrayList<>();
     }
 
-    public static ExecutorService getExec() {
+    public static int getId() {
+        return id;
+    }
+
+    public static ScheduledThreadPoolExecutor getExec() {
         return exec;
     }
 
@@ -96,9 +101,8 @@ public class Peer implements RMIRemote {
 
                 SendMessageThread sendThread = new SendMessageThread(message, "MDB");
 
-                Thread.sleep(500);
                 exec.execute(sendThread);
-            } catch (UnsupportedEncodingException | InterruptedException e) {
+            } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
         }

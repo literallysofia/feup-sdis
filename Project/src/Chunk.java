@@ -1,12 +1,18 @@
 public class Chunk {
     private int nr;
     private byte[] content;
+    private String fileID;
     private int desiredReplicationDegree;
     private int currReplicationDegree = 0;
 
     public Chunk(int nr, byte[] content) {
         this.nr = nr;
         this.content = content;
+    }
+    public Chunk(int nr, String fileID, int desiredReplicationDegree) {
+        this.nr = nr;
+        this.desiredReplicationDegree = desiredReplicationDegree;
+        this.fileID = fileID;
     }
 
     public int getNr() {
