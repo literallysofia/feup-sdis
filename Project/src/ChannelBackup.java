@@ -53,12 +53,8 @@ public class ChannelBackup implements Runnable {
             receiverSocket.joinGroup(address);
 
             while (true) {
-                // Receive the information and print it.
                 DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
                 receiverSocket.receive(msgPacket);
-
-                //String msg = new String(buf, 0, buf.length);
-                //System.out.println("CHANNEL BACKUP Received msg: " + msg);
 
                 byte[] bufferCopy = Arrays.copyOf(buf, msgPacket.getLength());
                 Peer.getExec().execute(new ManageReceivedMessageThread(bufferCopy));

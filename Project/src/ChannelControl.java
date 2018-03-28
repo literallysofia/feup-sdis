@@ -57,9 +57,6 @@ public class ChannelControl implements Runnable {
                 DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
                 receiverSocket.receive(msgPacket);
 
-                //String msg = new String(buf, 0, buf.length);
-                //System.out.println("CHANNEL CONTROL Received msg: " + msg);
-
                 byte[] bufferCopy = Arrays.copyOf(buf, msgPacket.getLength());
                 Peer.getExec().execute(new ManageReceivedMessageThread(bufferCopy));
             }

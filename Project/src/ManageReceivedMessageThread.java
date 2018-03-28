@@ -1,13 +1,7 @@
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 public class ManageReceivedMessageThread implements Runnable {
@@ -49,21 +43,13 @@ public class ManageReceivedMessageThread implements Runnable {
 
     private void managePutchunk() {
 
-        int i=0;
-        for (; i < this.msgBytes.length-6; i++){
-            if(this.msgBytes[i]==0xD && this.msgBytes[i+1] == 0xA && this.msgBytes[i+2]==0xD && this.msgBytes[i+3]==0xA){
-                break;
-            }
-        }
-        byte[] header = Arrays.copyOfRange(this.msgBytes, 0, i);
-        byte[] body = Arrays.copyOfRange(this.msgBytes, i+4, this.msgBytes.length);
+        List<byte[]> headerAndBody = getHeaderAndBody();
+        byte[] header=headerAndBody.get(0);
+        byte[] body=headerAndBody.get(1);
 
         String headerStr = new String(header);
-        String trimmedMsg = headerStr.trim();
-
-        System.out.println(trimmedMsg);
-
-        String[] headerArray = trimmedMsg.split(" ");
+        String trimmedStr = headerStr.trim();
+        String[] headerArray = trimmedStr.split(" ");
 
         Double version = Double.parseDouble(headerArray[1].trim());
         int senderId= Integer.parseInt(headerArray[2].trim());
@@ -73,12 +59,29 @@ public class ManageReceivedMessageThread implements Runnable {
 
         System.out.println("Received PUTCHUNK Version: "+ version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr + " replicationDegree: " +  replicationDegree);
 
-        System.out.println(new String(body));
-
         try (FileOutputStream fos = new FileOutputStream("./test.jpg")) {
             fos.write(body);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private List<byte[]> getHeaderAndBody(){
+
+        int i;
+        for (i=0; i < this.msgBytes.length-6; i++){
+            if(this.msgBytes[i]==0xD && this.msgBytes[i+1] == 0xA && this.msgBytes[i+2]==0xD && this.msgBytes[i+3]==0xA){
+                break;
+            }
+        }
+        byte[] header = Arrays.copyOfRange(this.msgBytes, 0, i);
+        byte[] body = Arrays.copyOfRange(this.msgBytes, i+4, this.msgBytes.length);
+
+        List<byte[]> headerAndBody = new ArrayList<>();
+
+        headerAndBody.add(header);
+        headerAndBody.add(body);
+
+        return headerAndBody;
     }
 }
