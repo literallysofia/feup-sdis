@@ -17,7 +17,6 @@ public class Peer implements RMIRemote {
     private static ChannelRestore MDR;
     private static ScheduledThreadPoolExecutor exec;
     private static Storage storage;
-    private static ArrayList<FileData> files;
 
     public Peer() {
         exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(50);
@@ -25,7 +24,6 @@ public class Peer implements RMIRemote {
         MDB = new ChannelBackup();
         MDR = new ChannelRestore();
         storage = new Storage();
-        files = new ArrayList<>();
     }
 
     public static int getId() {
@@ -50,10 +48,6 @@ public class Peer implements RMIRemote {
 
     public static Storage getStorage() {
         return storage;
-    }
-
-    public static ArrayList<FileData> getFiles() {
-        return files;
     }
 
     public static void main(String args[]) {
@@ -84,7 +78,7 @@ public class Peer implements RMIRemote {
     public void backup(String filepath, int replicationDegree) throws RemoteException {
 
         FileData file = new FileData(filepath);
-        files.add(file);
+        storage.addFile(file);
 
         for (int i = 0; i < file.getChunks().size(); i++) {
             Chunk chunk = file.getChunks().get(i);
@@ -106,8 +100,6 @@ public class Peer implements RMIRemote {
                 e.printStackTrace();
             }
         }
-
-        System.out.println("ANSWER: " + storage.getFiles().get(filepath));
     }
 
     public void restore(String filepath) throws RemoteException {

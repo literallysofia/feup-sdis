@@ -9,6 +9,7 @@ public class Chunk {
         this.nr = nr;
         this.content = content;
     }
+
     public Chunk(int nr, String fileID, int desiredReplicationDegree) {
         this.nr = nr;
         this.desiredReplicationDegree = desiredReplicationDegree;
