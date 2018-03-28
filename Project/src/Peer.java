@@ -109,6 +109,21 @@ public class Peer implements RMIRemote {
 
     public void delete(String filepath) throws RemoteException {
 
+        for (int i = 0; i < storage.getFiles().size(); i++) {
+            if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) {
+
+                String header = "DELETE " + "1.0" + " " + this.id + " " + storage.getFiles().get(i).getId() + "\r\n\r\n";
+
+                try {
+                    SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"),"MDB");
+
+                    exec.execute(sendThread);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
+            } else return;
+        }
     }
 
     public void reclaim(int diskSpaceToReclaim) throws RemoteException {
