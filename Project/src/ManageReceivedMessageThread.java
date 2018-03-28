@@ -20,6 +20,7 @@ public class ManageReceivedMessageThread implements Runnable {
         switch (msgArray[0]) {
             //CONTROL
             case "STORED":
+                manageStored();
                 break;
             case "GETCHUNK":
                 break;
@@ -44,38 +45,59 @@ public class ManageReceivedMessageThread implements Runnable {
     private void managePutchunk() {
 
         List<byte[]> headerAndBody = getHeaderAndBody();
-        byte[] header=headerAndBody.get(0);
-        byte[] body=headerAndBody.get(1);
+        byte[] header = headerAndBody.get(0);
+        byte[] body = headerAndBody.get(1);
 
         String headerStr = new String(header);
         String trimmedStr = headerStr.trim();
         String[] headerArray = trimmedStr.split(" ");
 
         Double version = Double.parseDouble(headerArray[1].trim());
-        int senderId= Integer.parseInt(headerArray[2].trim());
+        int senderId = Integer.parseInt(headerArray[2].trim());
         String fileId = headerArray[3].trim();
         int chunkNr = Integer.parseInt(headerArray[4].trim());
         int replicationDegree = Integer.parseInt(headerArray[5].trim());
 
-        System.out.println("Received PUTCHUNK Version: "+ version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr + " replicationDegree: " +  replicationDegree);
+        System.out.println("Received PUTCHUNK Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr + " replicationDegree: " + replicationDegree);
 
-        try (FileOutputStream fos = new FileOutputStream( + senderId + "_" + fileId + "_" + chunkNr)) {
+        try (FileOutputStream fos = new FileOutputStream(+senderId + "_" + fileId + "_" + chunkNr)) {
             fos.write(body);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private List<byte[]> getHeaderAndBody(){
+    private void manageStored() {
+
+        List<byte[]> headerAndBody = getHeaderAndBody();
+        byte[] header = headerAndBody.get(0);
+
+        String headerStr = new String(header);
+        String trimmedStr = headerStr.trim();
+        String[] headerArray = trimmedStr.split(" ");
+
+        Double version = Double.parseDouble(headerArray[1].trim());
+        int senderId = Integer.parseInt(headerArray[2].trim());
+        String fileId = headerArray[3].trim();
+        int chunkNr = Integer.parseInt(headerArray[4].trim());
+
+        Peer.getStorage().incStoredChunk(fileId, chunkNr);
+
+        //TODO: isto está shady
+
+        System.out.println("Received STORED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
+    }
+
+    private List<byte[]> getHeaderAndBody() {
 
         int i;
-        for (i=0; i < this.msgBytes.length-6; i++){
-            if(this.msgBytes[i]==0xD && this.msgBytes[i+1] == 0xA && this.msgBytes[i+2]==0xD && this.msgBytes[i+3]==0xA){
+        for (i = 0; i < this.msgBytes.length - 6; i++) {
+            if (this.msgBytes[i] == 0xD && this.msgBytes[i + 1] == 0xA && this.msgBytes[i + 2] == 0xD && this.msgBytes[i + 3] == 0xA) {
                 break;
             }
         }
         byte[] header = Arrays.copyOfRange(this.msgBytes, 0, i);
-        byte[] body = Arrays.copyOfRange(this.msgBytes, i+4, this.msgBytes.length);
+        byte[] body = Arrays.copyOfRange(this.msgBytes, i + 4, this.msgBytes.length);
 
         List<byte[]> headerAndBody = new ArrayList<>();
 

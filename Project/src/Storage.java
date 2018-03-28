@@ -35,7 +35,7 @@ public class Storage {
         this.files.remove(filePath);
     }
 
-    public void addChunk(String fileID, int chuckNr) {
+    public void incStoredChunk(String fileID, int chuckNr) {
         String key = fileID + '_' + chuckNr;
 
         if (this.chunks.putIfAbsent(key, 1) == null) {

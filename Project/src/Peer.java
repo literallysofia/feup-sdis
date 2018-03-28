@@ -3,6 +3,7 @@ import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
@@ -15,6 +16,7 @@ public class Peer implements RMIRemote {
     private static ChannelRestore MDR;
     private static ExecutorService exec;
     private static Storage storage;
+    private static ArrayList<FileData> files;
 
     public Peer() {
         exec = Executors.newFixedThreadPool(50);
@@ -22,6 +24,7 @@ public class Peer implements RMIRemote {
         MDB = new ChannelBackup();
         MDR = new ChannelRestore();
         storage = new Storage();
+        files = new ArrayList<>();
     }
 
     public static ExecutorService getExec() {
@@ -42,6 +45,10 @@ public class Peer implements RMIRemote {
 
     public static Storage getStorage() {
         return storage;
+    }
+
+    public static ArrayList<FileData> getFiles() {
+        return files;
     }
 
     public static void main(String args[]) {
@@ -71,7 +78,8 @@ public class Peer implements RMIRemote {
 
     public void backup(String filepath, int replicationDegree) throws RemoteException {
 
-        FileInfo file = new FileInfo(filepath);
+        FileData file = new FileData(filepath);
+        files.add(file);
 
         for (int i = 0; i < file.getChunks().size(); i++) {
             Chunk chunk = file.getChunks().get(i);
