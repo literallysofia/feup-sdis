@@ -1,30 +1,37 @@
 import java.io.*;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.io.RandomAccessFile;
 
 public class FileInfo {
-    private String path;
-    private int id = 100;
+    private String id;
+    private String path; //delete
+    private File file;
     private List<Chunk> chunks;
 
-    public FileInfo(String path){
-        this.path = path;
+    public FileInfo(String path) {
+        this.path = path; //delete
+        this.file = new File(path);
         this.chunks = new ArrayList<Chunk>();
         split();
         generateId();
+        Peer.getStorage().addFile(this.file.getPath(), this.id);
+    }
+
+    public String getId() {
+        return this.id;
+    }
+
+    public File getFile() {
+        return this.file;
     }
 
     public List<Chunk> getChunks() {
-        return chunks;
+        return this.chunks;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void split(){
+    public void split() {
         int chunkNr = 0;
 
         int sizeOfChunks = 64000;// 1MB
@@ -40,7 +47,7 @@ public class FileInfo {
 
                 chunkNr++;
                 Chunk chunk = new Chunk(chunkNr, body);
-                chunks.add(chunk);
+                this.chunks.add(chunk);
                 buffer = new byte[sizeOfChunks];
             }
 
@@ -49,7 +56,32 @@ public class FileInfo {
         }
     }
 
-    public void generateId(){
+    public void generateId() {
+        String fileName = this.file.getName();
+        String dateModified = String.valueOf(this.file.lastModified());
+        String owner = this.file.getParent();
 
+        String fileID = fileName + '-' + dateModified + '-' + owner;
+
+        this.id = sha256(fileID);
+    }
+
+    public static String sha256(String base) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(base.getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
+
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if (hex.length() == 1)
+                    hexString.append('0');
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }
