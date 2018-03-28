@@ -22,7 +22,7 @@ public class Storage {
 
     public Storage() {
         this.files = new ArrayList<>();
-        this.chunks =  new ArrayList<>();
+        this.chunks = new ArrayList<>();
         this.storedOccurrences = new ConcurrentHashMap<>();
     }
 
@@ -30,7 +30,7 @@ public class Storage {
         return this.files;
     }
 
-        public ArrayList<Chunk> getChunks() {
+    public ArrayList<Chunk> getChunks() {
         return this.chunks;
     }
 

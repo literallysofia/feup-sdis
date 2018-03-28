@@ -8,26 +8,25 @@ public class ChannelControl implements Runnable {
     private InetAddress address;
 
 
-    public ChannelControl(){
+    public ChannelControl() {
         //Get the address that we are going to connect to.
-        try{
+        try {
             address = InetAddress.getByName(INET_ADDR);
-        }
-        catch(UnknownHostException e){
+        } catch (UnknownHostException e) {
             e.printStackTrace();
         }
 
     }
 
 
-    public void sendMessage(byte[] msg){
+    public void sendMessage(byte[] msg) {
 
         // Open a new DatagramSocket, which will be used to send the data.
         try (DatagramSocket senderSocket = new DatagramSocket()) {
 
             // Create a packet that will contain the data
             // (in the form of bytes) and send it.
-            DatagramPacket msgPacket = new DatagramPacket(msg,msg.length, address, PORT);
+            DatagramPacket msgPacket = new DatagramPacket(msg, msg.length, address, PORT);
             senderSocket.send(msgPacket);
 
         } catch (IOException ex) {
@@ -35,7 +34,7 @@ public class ChannelControl implements Runnable {
         }
     }
 
-    public void run(){
+    public void run() {
 
         // Create a buffer of bytes, which will be used to store
         // the incoming bytes containing the information from the server.
@@ -44,7 +43,7 @@ public class ChannelControl implements Runnable {
 
         // Create a new Multicast socket (that will allow other sockets/programs
         // to join it as well.
-        try{
+        try {
             //Joint the Multicast group.
 
             MulticastSocket receiverSocket = new MulticastSocket(PORT);

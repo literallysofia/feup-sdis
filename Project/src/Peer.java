@@ -117,27 +117,29 @@ public class Peer implements RMIRemote {
 
     public void state() throws RemoteException {
         //Each file whose backup it has initiated
+        System.out.println("\n> For each file whose backup it has initiated!");
         for (int i = 0; i < storage.getFiles().size(); i++) {
             String fileID = storage.getFiles().get(i).getId();
 
-            System.out.println("FILE PATHNAME: " + storage.getFiles().get(i).getFile().getPath() + "\n");
-            System.out.println("FILE ID: " + fileID + "\n");
+            System.out.println("FILE PATHNAME: " + storage.getFiles().get(i).getFile().getPath());
+            System.out.println("FILE ID: " + fileID);
             System.out.println("FILE REPLICATION DEGREE: " + storage.getFiles().get(i).getReplicationDegree() + "\n");
 
             for (int j = 0; j < storage.getFiles().get(i).getChunks().size(); j++) {
                 int chunkNr = storage.getFiles().get(i).getChunks().get(j).getNr();
                 String key = fileID + '_' + chunkNr;
 
-                System.out.println("CHUNK ID: " + chunkNr + "\n");
+                System.out.println("CHUNK ID: " + chunkNr);
                 System.out.println("CHUNK PERCEIVED REPLICATION DEGREE: " + storage.getStoredOccurrences().get(key) + "\n");
             }
         }
 
         //Each chunk it stores
+        System.out.println("\n> For each chunk it stores!");
         for (int i = 0; i < storage.getChunks().size(); i++) {
             int chunkNr = storage.getChunks().get(i).getNr();
             String key = storage.getChunks().get(i).getFileID() + '_' + chunkNr;
-            System.out.println("CHUNK ID: " + chunkNr + "\n");
+            System.out.println("CHUNK ID: " + chunkNr);
             System.out.println("CHUNK PERCEIVED REPLICATION DEGREE: " + storage.getStoredOccurrences().get(key) + "\n");
         }
 

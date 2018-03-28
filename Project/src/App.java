@@ -62,10 +62,10 @@ public class App {
 
                 diskSpaceToReclaim = Integer.parseInt(args[2]);
                 peer.reclaim(diskSpaceToReclaim);
-                
+
             } else if (args[1].equals("STATE")) {
 
-                if (args.length != 1) {
+                if (args.length != 2) {
                     System.out.println("ERROR: State format must be: > STATE");
                     return;
                 }

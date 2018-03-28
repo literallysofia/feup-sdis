@@ -4,17 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ChannelRestore implements Runnable{
+public class ChannelRestore implements Runnable {
     private final String INET_ADDR = "224.0.0.17";
     private int PORT = 8003;
     private InetAddress address;
 
     public ChannelRestore() {
         //Get the address that we are going to connect to.
-        try{
+        try {
             address = InetAddress.getByName(INET_ADDR);
-        }
-        catch(UnknownHostException e){
+        } catch (UnknownHostException e) {
             e.printStackTrace();
         }
 
@@ -28,7 +27,7 @@ public class ChannelRestore implements Runnable{
 
             // Create a packet that will contain the data
             // (in the form of bytes) and send it.
-            DatagramPacket msgPacket = new DatagramPacket(msg,msg.length, address, PORT);
+            DatagramPacket msgPacket = new DatagramPacket(msg, msg.length, address, PORT);
             senderSocket.send(msgPacket);
 
             //System.out.println("CHANNEL RESTORE Sent msg: " + msg);
@@ -38,7 +37,7 @@ public class ChannelRestore implements Runnable{
         }
     }
 
-    public void run(){
+    public void run() {
 
         // Create a buffer of bytes, which will be used to store
         // the incoming bytes containing the information from the server.
@@ -47,7 +46,7 @@ public class ChannelRestore implements Runnable{
 
         // Create a new Multicast socket (that will allow other sockets/programs
         // to join it as well.
-        try{
+        try {
             //Joint the Multicast group.
 
             MulticastSocket receiverSocket = new MulticastSocket(PORT);

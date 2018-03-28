@@ -59,7 +59,7 @@ public class ManageReceivedMessageThread implements Runnable {
         int chunkNr = Integer.parseInt(headerArray[4].trim());
         int replicationDegree = Integer.parseInt(headerArray[5].trim());
 
-        if(Peer.getId() != senderId) {
+        if (Peer.getId() != senderId) {
             Random random = new Random();
             System.out.println("Received PUTCHUNK Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr + " replicationDegree: " + replicationDegree);
             Peer.getExec().schedule(new PutchunkReceivedThread(version, senderId, fileId, chunkNr, replicationDegree), random.nextInt(401), TimeUnit.MILLISECONDS);
@@ -80,7 +80,7 @@ public class ManageReceivedMessageThread implements Runnable {
         String fileId = headerArray[3].trim();
         int chunkNr = Integer.parseInt(headerArray[4].trim());
         Peer.getStorage().incStoredChunk(fileId, chunkNr);
-        if(Peer.getId() != senderId) {
+        if (Peer.getId() != senderId) {
             System.out.println("Received STORED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
         }
     }
