@@ -1,22 +1,29 @@
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Storage {
 
+    /*
+     * key = filePath
+     * value = fileID
+     */
     private ConcurrentHashMap<String, String> files;
-    private ArrayList<Chunk> chunks;
+
+    /*
+     * key = <fileID>_<ChunkNo>
+     * value = number of times the chunk is stored
+     */
+    private ConcurrentHashMap<String, Integer> chunks;
 
     public Storage() {
-        this.files = new ConcurrentHashMap<String, String>();
-        this.chunks = new ArrayList<Chunk>();
+        this.files = new ConcurrentHashMap<>();
+        this.chunks = new ConcurrentHashMap<>();
     }
 
     public ConcurrentHashMap getFiles() {
         return this.files;
     }
 
-    public ArrayList<Chunk> getChunks() {
+    public ConcurrentHashMap<String, Integer> getChunks() {
         return this.chunks;
     }
 
@@ -28,16 +35,18 @@ public class Storage {
         this.files.remove(filePath);
     }
 
-    public void addChunk(Chunk chunk) {
-        this.chunks.add(chunk);
+    public void addChunk(String fileID, int chuckNr) {
+        String key = fileID + '_' + chuckNr;
+
+        if (this.chunks.putIfAbsent(key, 1) == null) {
+            int total = this.chunks.get(key);
+            this.chunks.replace(key, total++);
+        }
     }
 
-    public void deleteChunk(Chunk chunk) {
-        for (int i = 0; i < this.chunks.size(); i++) {
-            if (chunk.getNr() == this.chunks.get(i).getNr()
-                    && Arrays.equals(chunk.getContent(), this.chunks.get(i).getContent()))
-                this.chunks.remove(i);
-        }
+    public void deleteChunk(String fileID, int chuckNr) {
+        String key = fileID + '_' + chuckNr;
+        this.files.remove(key);
     }
 
 }
