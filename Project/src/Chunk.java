@@ -5,8 +5,8 @@ public class Chunk {
     private int currReplicationDegree;
 
     public Chunk(int nr, byte[] content) {
-        this.nr =nr;
-        this.content=content;
+        this.nr = nr;
+        this.content = content;
     }
 
     public int getNr() {
