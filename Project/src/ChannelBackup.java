@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.*;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class ChannelBackup implements Runnable {
     private final String INET_ADDR = "224.0.0.16";
@@ -57,7 +58,6 @@ public class ChannelBackup implements Runnable {
                 receiverSocket.receive(msgPacket);
 
                 byte[] bufferCopy = Arrays.copyOf(buf, msgPacket.getLength());
-                Peer.getExec().execute(new ManageReceivedMessageThread(bufferCopy));
             }
         } catch (IOException ex) {
             ex.printStackTrace();

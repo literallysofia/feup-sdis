@@ -1,8 +1,11 @@
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class ManageReceivedMessageThread implements Runnable {
 
@@ -42,7 +45,6 @@ public class ManageReceivedMessageThread implements Runnable {
     }
 
     private void managePutchunk() {
-
         List<byte[]> headerAndBody = getHeaderAndBody();
         byte[] header=headerAndBody.get(0);
         byte[] body=headerAndBody.get(1);
@@ -57,13 +59,12 @@ public class ManageReceivedMessageThread implements Runnable {
         int chunkNr = Integer.parseInt(headerArray[4].trim());
         int replicationDegree = Integer.parseInt(headerArray[5].trim());
 
-        System.out.println("Received PUTCHUNK Version: "+ version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr + " replicationDegree: " +  replicationDegree);
+        Random random = new Random();
+        System.out.println("RANDOM: "+ random);
 
-        try (FileOutputStream fos = new FileOutputStream( + senderId + "_" + fileId + "_" + chunkNr)) {
-            fos.write(body);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Received PUTCHUNK Version: "+ version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr + " replicationDegree: " +  replicationDegree);
+        Peer.getExec().schedule(new PutchunkReceivedThread(version, senderId, fileId, chunkNr, replicationDegree), random.nextInt(401), TimeUnit.MILLISECONDS);
+
     }
 
     private List<byte[]> getHeaderAndBody(){
