@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.io.RandomAccessFile;
 
@@ -39,8 +40,10 @@ public class FileInfo {
             while ((bytesAmount = bis.read(buffer)) > 0) {
                 //bis.write(buffer, 0, bytesAmount);
 
+                byte[] body = Arrays.copyOf(buffer, bytesAmount);
+
                 chunkNr++;
-                Chunk chunk = new Chunk(chunkNr, buffer);
+                Chunk chunk = new Chunk(chunkNr, body);
                 chunks.add(chunk);
                 buffer = new byte[sizeOfChunks];
 

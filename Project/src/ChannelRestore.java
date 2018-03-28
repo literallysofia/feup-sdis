@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ChannelRestore implements Runnable{
@@ -58,11 +59,11 @@ public class ChannelRestore implements Runnable{
                 DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
                 receiverSocket.receive(msgPacket);
 
-                String msg = new String(buf, 0, buf.length);
-                System.out.println("CHANNEL RESTORE Received msg: " + msg);
+                //String msg = new String(buf, 0, buf.length);
+                //System.out.println("CHANNEL RESTORE Received msg: " + msg);
 
-                ManageReceivedMessageThread manageMessage = new ManageReceivedMessageThread(buf);
-                Peer.getExec().execute(manageMessage);
+                byte[] bufferCopy = Arrays.copyOf(buf, msgPacket.getLength());
+                Peer.getExec().execute(new ManageReceivedMessageThread(bufferCopy));
             }
         } catch (IOException ex) {
             ex.printStackTrace();

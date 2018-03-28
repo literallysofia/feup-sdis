@@ -79,8 +79,10 @@ public class Peer implements RMIRemote {
                 System.arraycopy(body,0,message,asciiHeader.length,body.length);
 
                 SendMessageThread sendThread = new SendMessageThread(message, "MDB");
+
+                Thread.sleep(500);
                 exec.execute(sendThread);
-            } catch (UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException | InterruptedException e) {
                 e.printStackTrace();
             }
         }

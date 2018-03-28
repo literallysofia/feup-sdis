@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
 
 public class ChannelControl implements Runnable {
     private final String INET_ADDR = "224.0.0.15";
@@ -53,15 +54,14 @@ public class ChannelControl implements Runnable {
             receiverSocket.joinGroup(address);
 
             while (true) {
-                // Receive the information and print it.
                 DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
                 receiverSocket.receive(msgPacket);
 
-                String msg = new String(buf, 0, buf.length);
-                System.out.println("CHANNEL CONTROL Received msg: " + msg);
+                //String msg = new String(buf, 0, buf.length);
+                //System.out.println("CHANNEL CONTROL Received msg: " + msg);
 
-                ManageReceivedMessageThread manageMessage = new ManageReceivedMessageThread(buf);
-                Peer.getExec().execute(manageMessage);
+                byte[] bufferCopy = Arrays.copyOf(buf, msgPacket.getLength());
+                Peer.getExec().execute(new ManageReceivedMessageThread(bufferCopy));
             }
         } catch (IOException ex) {
             ex.printStackTrace();
