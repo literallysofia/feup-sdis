@@ -19,14 +19,14 @@ public class ChannelBackup implements Runnable {
     }
 
 
-    public void sendMessage(String msg){
+    public void sendMessage(byte[] msg){
 
         // Open a new DatagramSocket, which will be used to send the data.
         try (DatagramSocket senderSocket = new DatagramSocket()) {
 
             // Create a packet that will contain the data
             // (in the form of bytes) and send it.
-            DatagramPacket msgPacket = new DatagramPacket(msg.getBytes(),msg.getBytes().length, address, PORT);
+            DatagramPacket msgPacket = new DatagramPacket(msg,msg.length, address, PORT);
             senderSocket.send(msgPacket);
 
             System.out.println("CHANNEL BACKUP Sent msg: " + msg);
@@ -59,7 +59,7 @@ public class ChannelBackup implements Runnable {
                 String msg = new String(buf, 0, buf.length);
                 System.out.println("CHANNEL BACKUP Received msg: " + msg);
 
-                ManageReceivedMessageThread manageMessage = new ManageReceivedMessageThread(msg);
+                ManageReceivedMessageThread manageMessage = new ManageReceivedMessageThread(buf);
                 Peer.getExec().execute(manageMessage);
             }
         } catch (IOException ex) {

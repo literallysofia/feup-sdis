@@ -4,7 +4,7 @@ public class Chunk {
     private int desiredReplicationDegree;
     private int currReplicationDegree;
 
-    public Chunk(int nr, byte[] body){
+    public Chunk(int nr, byte[] content) {
         this.nr =nr;
         this.content=content;
     }

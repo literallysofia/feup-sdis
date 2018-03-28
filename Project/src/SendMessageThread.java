@@ -1,10 +1,10 @@
-public class SentMessageThread implements Runnable{
+public class SendMessageThread implements Runnable{
 
-    private String msg;
+    private byte[] msg;
     private String multicastType;
 
 
-    public SentMessageThread(String msg, String multicastType) {
+    public SendMessageThread(byte[] msg, String multicastType) {
         this.msg=msg;
         this.multicastType = multicastType;
     }

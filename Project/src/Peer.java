@@ -66,16 +66,25 @@ public class Peer implements RMIRemote {
     public void backup(String filepath, int replicationDegree) throws RemoteException{
 
         FileInfo file = new FileInfo(filepath);
-        file.setReplicationDegree(replicationDegree);
 
         for(int i = 0; i < file.getChunks().size(); i++){
             Chunk chunk = file.getChunks().get(i);
             chunk.setDesiredReplicationDegree(replicationDegree);
 
-            String message = "PUTCHUNK " +  "1.0" + " " + file.getId() + " " + chunk.getNr() + " " + chunk.getDesiredReplicationDegree() + "\r\n\r\n" + chunk.getContent();
+            String header = "PUTCHUNK " +  "1.0" + " " + this.id + " " + file.getId() + " " + chunk.getNr() + " " + chunk.getDesiredReplicationDegree() + "\r\n\r\n";
 
-            SentMessageThread sentThread = new SentMessageThread(message, "MDB");
-            exec.execute(sentThread);
+            try {
+                byte[] asciiHeader = header.getBytes("US-ASCII");
+                byte[] body = chunk.getContent();
+                byte[] message = new byte[asciiHeader.length + body.length];
+                System.arraycopy(asciiHeader,0,message,0,asciiHeader.length);
+                System.arraycopy(body,0,message,asciiHeader.length,body.length);
+
+                SendMessageThread sendThread = new SendMessageThread(message, "MDB");
+                exec.execute(sendThread);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
     }
 
