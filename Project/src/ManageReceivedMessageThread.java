@@ -28,6 +28,7 @@ public class ManageReceivedMessageThread implements Runnable {
             case "GETCHUNK":
                 break;
             case "DELETE":
+                manageDelete();
                 break;
             case "REMOVED":
                 break;
@@ -79,9 +80,33 @@ public class ManageReceivedMessageThread implements Runnable {
         int senderId = Integer.parseInt(headerArray[2].trim());
         String fileId = headerArray[3].trim();
         int chunkNr = Integer.parseInt(headerArray[4].trim());
+
         Peer.getStorage().incStoredChunk(fileId, chunkNr);
+
         if (Peer.getId() != senderId) {
             System.out.println("Received STORED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
+        }
+    }
+
+    private void manageDelete() {
+
+        List<byte[]> headerAndBody = getHeaderAndBody();
+        byte[] header = headerAndBody.get(0);
+
+        String headerStr = new String(header);
+        String trimmedStr = headerStr.trim();
+        String[] headerArray = trimmedStr.split(" ");
+
+        Double version = Double.parseDouble(headerArray[1].trim());
+        int senderId = Integer.parseInt(headerArray[2].trim());
+        String fileId = headerArray[3].trim();
+
+        Peer.getStorage().deleteChunks(fileId, senderId);
+        Peer.getStorage().deleteChunks(fileId, senderId);
+        Peer.getStorage().deleteChunks(fileId, senderId);
+
+        if (Peer.getId() != senderId) {
+            System.out.println("Received DELETE Version: " + version + " SenderId: " + senderId + " fileId: " + fileId);
         }
     }
 

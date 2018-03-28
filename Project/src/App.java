@@ -46,7 +46,7 @@ public class App {
                 peer.restore(filePath);
             } else if (args[1].equals("DELETE")) {
 
-                if (args.length != 2) {
+                if (args.length != 3) {
                     System.out.println("ERROR: Delete format must be: > DELETE <file_path>");
                     return;
                 }

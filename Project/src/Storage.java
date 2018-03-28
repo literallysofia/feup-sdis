@@ -1,3 +1,5 @@
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,7 +12,7 @@ public class Storage {
     private ArrayList<FileData> files;
 
     /*
-     * Array that contains all chunks
+     * Array that contains all chunks stored in a peer
      */
     private ArrayList<Chunk> chunks;
 
@@ -49,6 +51,19 @@ public class Storage {
             int total = this.storedOccurrences.get(key);
             this.storedOccurrences.replace(key, total++);
         }
+    }
+
+    public void deleteChunks(String fileID, int senderId) {
+        for (int i = 0; i < this.chunks.size(); i++) {
+            if (this.chunks.get(i).getFileID().equals(fileID)) {
+                String filename = Peer.getId() + "/" + senderId + "_" + fileID + "_" + this.chunks.get(i).getNr();
+                File file = new File(filename);
+                file.delete();
+                this.chunks.remove(i);
+            }
+
+        }
+
     }
 
 }
