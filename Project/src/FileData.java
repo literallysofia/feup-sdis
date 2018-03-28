@@ -1,22 +1,22 @@
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-public class FileInfo {
+public class FileData {
+
     private String id;
-    private String path; //delete
     private File file;
-    private List<Chunk> chunks;
+    private ArrayList<Chunk> chunks;
 
-    public FileInfo(String path) {
-        this.path = path; //delete
+    public FileData(String path) {
         this.file = new File(path);
-        this.chunks = new ArrayList<Chunk>();
-        split();
+        this.chunks = new ArrayList<>();
+        splitFile();
         generateId();
-        Peer.getStorage().addFile(this.file.getPath(), this.id);
     }
 
     public String getId() {
@@ -27,18 +27,17 @@ public class FileInfo {
         return this.file;
     }
 
-    public List<Chunk> getChunks() {
+    public ArrayList<Chunk> getChunks() {
         return this.chunks;
     }
 
-    public void split() {
+    public void splitFile() {
         int chunkNr = 0;
 
         int sizeOfChunks = 64000;// 1MB
         byte[] buffer = new byte[sizeOfChunks];
-        File f = new File(path);
 
-        try (FileInputStream fis = new FileInputStream(f);
+        try (FileInputStream fis = new FileInputStream(this.file);
              BufferedInputStream bis = new BufferedInputStream(fis)) {
 
             int bytesAmount = 0;
@@ -84,4 +83,5 @@ public class FileInfo {
             throw new RuntimeException(ex);
         }
     }
+
 }

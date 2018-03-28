@@ -3,6 +3,7 @@ import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
@@ -76,7 +77,8 @@ public class Peer implements RMIRemote {
 
     public void backup(String filepath, int replicationDegree) throws RemoteException {
 
-        FileInfo file = new FileInfo(filepath);
+        FileData file = new FileData(filepath);
+        storage.addFile(file);
 
         for (int i = 0; i < file.getChunks().size(); i++) {
             Chunk chunk = file.getChunks().get(i);
@@ -98,8 +100,6 @@ public class Peer implements RMIRemote {
                 e.printStackTrace();
             }
         }
-
-        System.out.println("ANSWER: " + storage.getFiles().get(filepath));
     }
 
     public void restore(String filepath) throws RemoteException {

@@ -1,52 +1,53 @@
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Storage {
 
     /*
-     * key = filePath
-     * value = fileID
+     * Array that contains all files and data
      */
-    private ConcurrentHashMap<String, String> files;
+
+    private ArrayList<FileData> files;
+
+    /*
+     * Array that contains all chunks
+     */
+    private ArrayList<Chunk> chunks;
 
     /*
      * key = <fileID>_<ChunkNo>
      * value = number of times the chunk is stored
      */
-    private ConcurrentHashMap<String, Integer> chunks;
+    private ConcurrentHashMap<String, Integer> storedOccurrences;
 
     public Storage() {
-        this.files = new ConcurrentHashMap<>();
-        this.chunks = new ConcurrentHashMap<>();
+        this.files = new ArrayList<>();
+        this.storedOccurrences = new ConcurrentHashMap<>();
     }
 
-    public ConcurrentHashMap getFiles() {
+    public ArrayList<FileData> getFiles() {
         return this.files;
     }
 
-    public ConcurrentHashMap<String, Integer> getChunks() {
+    public ArrayList<Chunk> getChunks() {
         return this.chunks;
     }
 
-    public void addFile(String filePath, String fileID) {
-        this.files.put(filePath, fileID);
+    public ConcurrentHashMap<String, Integer> getStoredOccurrences() {
+        return this.storedOccurrences;
     }
 
-    public void deleteFile(String filePath) {
-        this.files.remove(filePath);
+    public void addFile(FileData f) {
+        this.files.add(f);
     }
 
-    public void addChunk(String fileID, int chuckNr) {
+    public void incStoredChunk(String fileID, int chuckNr) {
         String key = fileID + '_' + chuckNr;
 
-        if (this.chunks.putIfAbsent(key, 1) == null) {
-            int total = this.chunks.get(key);
-            this.chunks.replace(key, total++);
+        if (this.storedOccurrences.putIfAbsent(key, 1) == null) {
+            int total = this.storedOccurrences.get(key);
+            this.storedOccurrences.replace(key, total++);
         }
-    }
-
-    public void deleteChunk(String fileID, int chuckNr) {
-        String key = fileID + '_' + chuckNr;
-        this.files.remove(key);
     }
 
 }
