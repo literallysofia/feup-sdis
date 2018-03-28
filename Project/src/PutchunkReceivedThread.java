@@ -21,7 +21,6 @@ public class PutchunkReceivedThread implements Runnable {
 
     @Override
     public void run() {
-        if(Peer.getId() != senderId){
 
             Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree);
             Peer.getStorage().getChunks().add(chunk);
@@ -40,6 +39,8 @@ public class PutchunkReceivedThread implements Runnable {
 
             String header = "STORED " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr + "\r\n\r\n";
 
+            System.out.println("Sent: " + header);
+
             SendMessageThread sendThread = null;
             try {
                 sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MC");
@@ -47,6 +48,5 @@ public class PutchunkReceivedThread implements Runnable {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-        }
     }
 }
