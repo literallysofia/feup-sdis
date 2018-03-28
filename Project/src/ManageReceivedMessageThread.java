@@ -59,7 +59,7 @@ public class ManageReceivedMessageThread implements Runnable {
 
         System.out.println("Received PUTCHUNK Version: "+ version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr + " replicationDegree: " +  replicationDegree);
 
-        try (FileOutputStream fos = new FileOutputStream("./test.jpg")) {
+        try (FileOutputStream fos = new FileOutputStream( + senderId + "_" + fileId + "_" + chunkNr)) {
             fos.write(body);
         } catch (IOException e) {
             e.printStackTrace();
