@@ -10,10 +10,12 @@ public class FileData {
 
     private String id;
     private File file;
+    private int replicationDegree;
     private ArrayList<Chunk> chunks;
 
-    public FileData(String path) {
+    public FileData(String path, int replicationDegree) {
         this.file = new File(path);
+        this.replicationDegree = replicationDegree;
         this.chunks = new ArrayList<>();
         splitFile();
         generateId();
@@ -25,6 +27,10 @@ public class FileData {
 
     public File getFile() {
         return this.file;
+    }
+
+    public int getReplicationDegree() {
+        return this.replicationDegree;
     }
 
     public ArrayList<Chunk> getChunks() {

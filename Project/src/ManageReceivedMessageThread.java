@@ -31,8 +31,6 @@ public class ManageReceivedMessageThread implements Runnable {
                 break;
             case "REMOVED":
                 break;
-            case "STATUS":
-                break;
             //BACKUP
             case "PUTCHUNK":
                 managePutchunk();

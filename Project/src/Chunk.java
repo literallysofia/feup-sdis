@@ -24,6 +24,10 @@ public class Chunk {
         return content;
     }
 
+    public String getFileID() {
+        return this.fileID;
+    }
+
     public int getDesiredReplicationDegree() {
         return desiredReplicationDegree;
     }
