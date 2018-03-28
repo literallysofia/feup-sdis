@@ -60,7 +60,7 @@ public class ChannelControl implements Runnable {
                 String msg = new String(buf, 0, buf.length);
                 System.out.println("CHANNEL CONTROL Received msg: " + msg);
 
-                ManageReceivedMessageThread manageMessage = new ManageReceivedMessageThread(msg);
+                ManageReceivedMessageThread manageMessage = new ManageReceivedMessageThread(buf);
                 Peer.getExec().execute(manageMessage);
             }
         } catch (IOException ex) {

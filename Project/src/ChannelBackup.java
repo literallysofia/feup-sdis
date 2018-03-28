@@ -59,7 +59,7 @@ public class ChannelBackup implements Runnable {
                 String msg = new String(buf, 0, buf.length);
                 System.out.println("CHANNEL BACKUP Received msg: " + msg);
 
-                ManageReceivedMessageThread manageMessage = new ManageReceivedMessageThread(msg);
+                ManageReceivedMessageThread manageMessage = new ManageReceivedMessageThread(buf);
                 Peer.getExec().execute(manageMessage);
             }
         } catch (IOException ex) {

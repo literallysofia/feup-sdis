@@ -1,5 +1,7 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChannelRestore implements Runnable{
     private final String INET_ADDR = "224.0.0.17";
@@ -59,7 +61,7 @@ public class ChannelRestore implements Runnable{
                 String msg = new String(buf, 0, buf.length);
                 System.out.println("CHANNEL RESTORE Received msg: " + msg);
 
-                ManageReceivedMessageThread manageMessage = new ManageReceivedMessageThread(msg);
+                ManageReceivedMessageThread manageMessage = new ManageReceivedMessageThread(buf);
                 Peer.getExec().execute(manageMessage);
             }
         } catch (IOException ex) {
