@@ -40,6 +40,8 @@ public class Peer implements RMIRemote {
 
     public static void main(String args[]){
 
+        System.setProperty("java.net.preferIPv4Stack", "true");
+
         try {
             Peer obj = new Peer();
             obj.id = Integer.parseInt(args[0]);
