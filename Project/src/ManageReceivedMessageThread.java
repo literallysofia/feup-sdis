@@ -1,14 +1,12 @@
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 public class ManageReceivedMessageThread implements Runnable {
 
-    public byte[] msgBytes;
+    private byte[] msgBytes;
 
     public ManageReceivedMessageThread(byte[] msgBytes) {
         this.msgBytes = msgBytes;
@@ -43,18 +41,15 @@ public class ManageReceivedMessageThread implements Runnable {
         }
     }
 
-    public void managePutchunk() {
+    private void managePutchunk() {
 
-        byte[] CRLFCRLF = ("\r\n\r\n").getBytes();
+        List<byte[]> headerAndBody = getHeaderAndBody();
+        byte[] header=headerAndBody.get(0);
+        byte[] body=headerAndBody.get(1);
 
-        List<byte[]> headerBody = tokens(msgBytes, CRLFCRLF);
-        System.out.println("MESSAGE: " + msgBytes);
-        System.out.println("HEADER: " + headerBody.get(0));
-        System.out.println("BODY: " + headerBody.get(1));
-
-        String headerStr = new String(headerBody.get(0));
-        String trimmedMsg = headerStr.trim();
-        String[] headerArray = trimmedMsg.split(" ");
+        String headerStr = new String(header);
+        String trimmedStr = headerStr.trim();
+        String[] headerArray = trimmedStr.split(" ");
 
         Double version = Double.parseDouble(headerArray[1].trim());
         int senderId= Integer.parseInt(headerArray[2].trim());
@@ -63,26 +58,30 @@ public class ManageReceivedMessageThread implements Runnable {
         int replicationDegree = Integer.parseInt(headerArray[5].trim());
 
         System.out.println("Received PUTCHUNK Version: "+ version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr + " replicationDegree: " +  replicationDegree);
+
+        try (FileOutputStream fos = new FileOutputStream("./test.jpg")) {
+            fos.write(body);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public static List<byte[]> tokens(byte[] array, byte[] delimiter) {
-        List<byte[]> byteArrays = new LinkedList<>();
-        if (delimiter.length == 0) {
-            return byteArrays;
-        }
-        int begin = 0;
+    private List<byte[]> getHeaderAndBody(){
 
-        outer:
-        for (int i = 0; i < array.length - delimiter.length + 1; i++) {
-            for (int j = 0; j < delimiter.length; j++) {
-                if (array[i + j] != delimiter[j]) {
-                    continue outer;
-                }
+        int i;
+        for (i=0; i < this.msgBytes.length-6; i++){
+            if(this.msgBytes[i]==0xD && this.msgBytes[i+1] == 0xA && this.msgBytes[i+2]==0xD && this.msgBytes[i+3]==0xA){
+                break;
             }
-            byteArrays.add(Arrays.copyOfRange(array, begin, i));
-            begin = i + delimiter.length;
         }
-        byteArrays.add(Arrays.copyOfRange(array, begin, array.length));
-        return byteArrays;
+        byte[] header = Arrays.copyOfRange(this.msgBytes, 0, i);
+        byte[] body = Arrays.copyOfRange(this.msgBytes, i+4, this.msgBytes.length);
+
+        List<byte[]> headerAndBody = new ArrayList<>();
+
+        headerAndBody.add(header);
+        headerAndBody.add(body);
+
+        return headerAndBody;
     }
 }

@@ -1,6 +1,7 @@
 import java.io.*;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class FileInfo {
@@ -37,24 +38,17 @@ public class FileInfo {
         byte[] buffer = new byte[sizeOfChunks];
         File f = new File(path);
 
-        String filename = f.getName();
-
-        try (FileInputStream fis = new FileInputStream(f); BufferedInputStream bis = new BufferedInputStream(fis)) {
+        try (FileInputStream fis = new FileInputStream(f);
+             BufferedInputStream bis = new BufferedInputStream(fis)) {
 
             int bytesAmount = 0;
             while ((bytesAmount = bis.read(buffer)) > 0) {
-                //bis.write(buffer, 0, bytesAmount);
+                byte[] body = Arrays.copyOf(buffer, bytesAmount);
 
                 chunkNr++;
-                Chunk chunk = new Chunk(chunkNr, buffer);
+                Chunk chunk = new Chunk(chunkNr, body);
                 this.chunks.add(chunk);
                 buffer = new byte[sizeOfChunks];
-
-                /*String filePartName = String.format("%s-%03d.jpg", fileName, chunkNr++);
-                File newFile = new File(f.getParent(), filePartName);
-                try (FileOutputStream out = new FileOutputStream(newFile)) {
-                    out.write(buffer, 0, bytesAmount);
-                }*/
             }
 
         } catch (IOException e) {

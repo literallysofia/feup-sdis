@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
 
 public class ChannelBackup implements Runnable {
     private final String INET_ADDR = "224.0.0.16";
@@ -41,7 +42,7 @@ public class ChannelBackup implements Runnable {
         // Create a buffer of bytes, which will be used to store
         // the incoming bytes containing the information from the server.
         // Since the message is small here, 256 bytes should be enough.
-        byte[] buf = new byte[256];
+        byte[] buf = new byte[64000];
 
         // Create a new Multicast socket (that will allow other sockets/programs
         // to join it as well.
@@ -52,15 +53,11 @@ public class ChannelBackup implements Runnable {
             receiverSocket.joinGroup(address);
 
             while (true) {
-                // Receive the information and print it.
                 DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
                 receiverSocket.receive(msgPacket);
 
-                String msg = new String(buf, 0, buf.length);
-                System.out.println("CHANNEL BACKUP Received msg: " + msg);
-
-                ManageReceivedMessageThread manageMessage = new ManageReceivedMessageThread(buf);
-                Peer.getExec().execute(manageMessage);
+                byte[] bufferCopy = Arrays.copyOf(buf, msgPacket.getLength());
+                Peer.getExec().execute(new ManageReceivedMessageThread(bufferCopy));
             }
         } catch (IOException ex) {
             ex.printStackTrace();
