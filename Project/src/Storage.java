@@ -51,13 +51,13 @@ public class Storage {
             this.storedOccurrences.replace(key, total++);
         }*/
 
-        if(this.storedOccurrences.containsKey(key)) {
+        //if(this.storedOccurrences.containsKey(key)) {
             int total = this.storedOccurrences.get(key) + 1;
             this.storedOccurrences.replace(key, total);
-        }
-        else{
-            this.storedOccurrences.put(key, 1);
-        }
+        //}
+        //else{
+          //  this.storedOccurrences.put(key, 1);
+        //}
     }
 
     public void deleteChunks(String fileID, int senderId) {
