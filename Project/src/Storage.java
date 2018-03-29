@@ -43,6 +43,16 @@ public class Storage {
         this.files.add(f);
     }
 
+    public boolean addChunk(Chunk chunk) {
+
+        for (int i = 0; i < this.chunks.size(); i++) {
+            if (this.chunks.get(i).getFileID().equals(chunk.getFileID()) && this.chunks.get(i).getNr() == chunk.getNr())
+                return false;
+        }
+        this.chunks.add(chunk);
+        return true;
+    }
+
     public void incStoredChunk(String fileID, int chuckNr) {
         String key = fileID + '_' + chuckNr;
 
@@ -52,11 +62,11 @@ public class Storage {
         }*/
 
         //if(this.storedOccurrences.containsKey(key)) {
-            int total = this.storedOccurrences.get(key) + 1;
-            this.storedOccurrences.replace(key, total);
+        int total = this.storedOccurrences.get(key) + 1;
+        this.storedOccurrences.replace(key, total);
         //}
         //else{
-          //  this.storedOccurrences.put(key, 1);
+        //  this.storedOccurrences.put(key, 1);
         //}
     }
 

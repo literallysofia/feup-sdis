@@ -61,7 +61,9 @@ public class ManageReceivedMessageThread implements Runnable {
         int replicationDegree = Integer.parseInt(headerArray[5].trim());
 
         String key = fileId + "_" + chunkNr;
-        Peer.getStorage().getStoredOccurrences().put(key, 0);
+        if (!Peer.getStorage().getStoredOccurrences().containsKey(key)) {
+            Peer.getStorage().getStoredOccurrences().put(key, 0);
+        }
 
         if (Peer.getId() != senderId) {
             Random random = new Random();

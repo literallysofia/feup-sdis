@@ -85,7 +85,10 @@ public class Peer implements RMIRemote {
             String header = "PUTCHUNK " + "1.0" + " " + this.id + " " + file.getId() + " " + chunk.getNr() + " " + chunk.getDesiredReplicationDegree() + "\r\n\r\n";
 
             String key = file.getId() + "_" + chunk.getNr();
-            Peer.getStorage().getStoredOccurrences().put(key, 0);
+
+            if (!this.storage.getStoredOccurrences().containsKey(key)) {
+                Peer.getStorage().getStoredOccurrences().put(key, 0);
+            }
 
             try {
                 byte[] asciiHeader = header.getBytes("US-ASCII");
@@ -116,7 +119,7 @@ public class Peer implements RMIRemote {
                 String header = "DELETE " + "1.0" + " " + this.id + " " + storage.getFiles().get(i).getId() + "\r\n\r\n";
 
                 try {
-                    SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"),"MDB");
+                    SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MDB");
 
                     exec.execute(sendThread);
                 } catch (UnsupportedEncodingException e) {

@@ -25,7 +25,9 @@ public class PutchunkReceivedThread implements Runnable {
         if (Peer.getStorage().getStoredOccurrences().get(key) < replicationDegree) {
 
             Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree);
-            Peer.getStorage().getChunks().add(chunk);
+
+            if (!Peer.getStorage().addChunk(chunk))
+                return;
 
             try {
                 String filename = Peer.getId() + "/" + senderId + "_" + fileId + "_" + chunkNr;
@@ -38,6 +40,7 @@ public class PutchunkReceivedThread implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            Peer.getStorage().incStoredChunk(fileId, chunkNr);
             String header = "STORED " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr + "\r\n\r\n";
             System.out.println("Sent " + header);
             SendMessageThread sendThread = null;
