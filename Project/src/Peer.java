@@ -87,6 +87,9 @@ public class Peer implements RMIRemote {
 
             String header = "PUTCHUNK " + "1.0" + " " + this.id + " " + file.getId() + " " + chunk.getNr() + " " + chunk.getDesiredReplicationDegree() + "\r\n\r\n";
 
+            String key = file.getId() + "_" + chunk.getNr();
+            Peer.getStorage().getStoredOccurrences().put(key, 0);
+
             try {
                 byte[] asciiHeader = header.getBytes("US-ASCII");
                 byte[] body = chunk.getContent();
