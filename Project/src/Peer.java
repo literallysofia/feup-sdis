@@ -3,12 +3,9 @@ import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Peer implements RMIRemote {
 
@@ -95,8 +92,9 @@ public class Peer implements RMIRemote {
                 System.arraycopy(body, 0, message, asciiHeader.length, body.length);
 
                 SendMessageThread sendThread = new SendMessageThread(message, "MDB");
-
                 exec.execute(sendThread);
+
+                Peer.getExec().schedule(new PutChunkManager(message, 1, file.getId(), chunk.getNr(), replicationDegree), 1, TimeUnit.SECONDS);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
