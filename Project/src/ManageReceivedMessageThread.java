@@ -21,7 +21,6 @@ public class ManageReceivedMessageThread implements Runnable {
         String[] msgArray = trimmedMsg.split(" ");
 
         switch (msgArray[0]) {
-            //CONTROL
             case "STORED":
                 manageStored();
                 break;
@@ -34,19 +33,16 @@ public class ManageReceivedMessageThread implements Runnable {
             case "REMOVED":
                 manageRemoved();
                 break;
-            //BACKUP
             case "PUTCHUNK":
                 managePutchunk();
                 break;
-            //RESTORE
-            case "RESTORE":
-                break;
             case "CHUNK":
+                manageChunk();
                 break;
         }
     }
 
-    private  synchronized void managePutchunk() {
+    private synchronized void managePutchunk() {
 
         List<byte[]> headerAndBody = getHeaderAndBody();
         byte[] header = headerAndBody.get(0);
@@ -131,7 +127,34 @@ public class ManageReceivedMessageThread implements Runnable {
         if (Peer.getId() != senderId) {
             Random random = new Random();
             System.out.println("Received GETCHUNK Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
-            Peer.getExec().schedule(new GetChunkReceivedThread(version, senderId, fileId, chunkNr), random.nextInt(401), TimeUnit.MILLISECONDS);
+            Peer.getExec().schedule(new GetChunkReceivedThread(fileId, chunkNr), random.nextInt(401), TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void manageChunk() {
+
+        List<byte[]> headerAndBody = getHeaderAndBody();
+        byte[] header = headerAndBody.get(0);
+        byte[] body = headerAndBody.get(1);
+
+        String headerStr = new String(header);
+        String trimmedStr = headerStr.trim();
+        String[] headerArray = trimmedStr.split(" ");
+
+        Double version = Double.parseDouble(headerArray[1].trim());
+        int senderId = Integer.parseInt(headerArray[2].trim());
+        String fileId = headerArray[3].trim();
+        int chunkNr = Integer.parseInt(headerArray[4].trim());
+
+        if (Peer.getId() != senderId) {
+            Chunk chunk = new Chunk(chunkNr, fileId, 0, 0);
+            Peer.getStorage().getReceivedChunks().add(chunk);
+
+            if (!Peer.getStorage().getWantedChunks().isEmpty()) {
+                Peer.getStorage().addWantedChunkContent(fileId, chunkNr, body);
+                System.out.println("ADDED WANTED!");
+            }
+            System.out.println("Received CHUNK Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
         }
     }
 

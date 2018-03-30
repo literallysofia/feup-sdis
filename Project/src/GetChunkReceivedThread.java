@@ -2,59 +2,62 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class GetChunkReceivedThread implements Runnable {
 
-    private Double version;
-    private int senderId;
     private String fileId;
     private int chunkNr;
 
-    public GetChunkReceivedThread(Double version, int senderId, String fileId, int chunkNr) {
-        this.version = version;
-        this.senderId = senderId;
+    public GetChunkReceivedThread(String fileId, int chunkNr) {
         this.fileId = fileId;
         this.chunkNr = chunkNr;
     }
 
     @Override
     public void run() {
-        /*String key = fileId + "_" + chunkNr;
-        if (Peer.getStorage().getStoredOccurrences().get(key) < replicationDegree) {
+        for (int i = 0; i < Peer.getStorage().getStoredChunks().size(); i++) {
+            if (isSameChunk(Peer.getStorage().getStoredChunks().get(i).getFileID(), Peer.getStorage().getStoredChunks().get(i).getNr()) && !isAbortSend()) {
+                String header = "CHUNK " + "1.0" + " " + Peer.getId() + " " + this.fileId + " " + this.chunkNr + "\r\n\r\n";
 
-            Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree, content.length);
+                try {
+                    byte[] asciiHeader = header.getBytes("US-ASCII");
 
-            if (!Peer.getStorage().addStoredChunk(chunk))
-                return;
+                    String chunkPath = Peer.getId() + "/" + fileId + "_" + chunkNr;
 
-            try {
-                String filename = Peer.getId() + "/" + senderId + "_" + fileId + "_" + chunkNr;
+                    Path fileLocation = Paths.get(chunkPath);
+                    byte[] body = Files.readAllBytes(fileLocation);
 
-                File file = new File(filename);
-                if (!file.exists()) {
-                    file.getParentFile().mkdirs();
-                    file.createNewFile();
+                    byte[] message = new byte[asciiHeader.length + body.length];
+                    System.arraycopy(asciiHeader, 0, message, 0, asciiHeader.length);
+                    System.arraycopy(body, 0, message, asciiHeader.length, body.length);
+
+                    SendMessageThread sendThread = new SendMessageThread(message, "MDR");
+                    System.out.println("Sent CHUNK");
+                    Peer.getExec().execute(sendThread);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
-                try (FileOutputStream fos = new FileOutputStream(filename)) {
-                    fos.write(content);
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-            Peer.getStorage().incStoredChunk(fileId, chunkNr);
-            String header = "STORED " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr + "\r\n\r\n";
-            System.out.println("Sent " + header);
-            SendMessageThread sendThread = null;
-            try {
-                sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MC");
-                Peer.getExec().execute(sendThread);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-        }*/
+        }
+    }
 
+    private boolean isSameChunk(String fileId, int chunkNr) {
+        if (fileId.equals(this.fileId) && chunkNr == this.chunkNr)
+            return true;
+        else return false;
+    }
 
+    private boolean isAbortSend() {
+        for (int i = 0; i < Peer.getStorage().getReceivedChunks().size(); i++) {
+            if (isSameChunk(Peer.getStorage().getReceivedChunks().get(i).getFileID(), Peer.getStorage().getReceivedChunks().get(i).getNr()))
+                return true;
+        }
+        return false;
     }
 }

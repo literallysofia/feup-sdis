@@ -12,13 +12,13 @@ public class PutchunkReceivedThread implements Runnable {
     private int replicationDegree;
     private byte[] content;
 
-    public PutchunkReceivedThread(Double version, int senderId, String fileId, int chunkNr, int replicationDegree, byte [] content) {
+    public PutchunkReceivedThread(Double version, int senderId, String fileId, int chunkNr, int replicationDegree, byte[] content) {
         this.version = version;
         this.senderId = senderId;
         this.fileId = fileId;
         this.chunkNr = chunkNr;
         this.replicationDegree = replicationDegree;
-        this.content=content;
+        this.content = content;
     }
 
     @Override
@@ -52,7 +52,5 @@ public class PutchunkReceivedThread implements Runnable {
             System.out.println("Sent " + header);
             Peer.getMC().sendMessage(header.getBytes());
         }
-
-
     }
 }
