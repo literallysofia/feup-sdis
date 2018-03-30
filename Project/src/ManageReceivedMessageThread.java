@@ -106,9 +106,7 @@ public class ManageReceivedMessageThread implements Runnable {
         int senderId = Integer.parseInt(headerArray[2].trim());
         String fileId = headerArray[3].trim();
 
-        Peer.getStorage().deleteChunks(fileId, senderId);
-        Peer.getStorage().deleteChunks(fileId, senderId);
-        Peer.getStorage().deleteChunks(fileId, senderId);
+        Peer.getStorage().deleteStoredChunks(fileId, senderId);
 
         if (Peer.getId() != senderId) {
             System.out.println("Received DELETE Version: " + version + " SenderId: " + senderId + " fileId: " + fileId);

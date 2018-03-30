@@ -83,8 +83,8 @@ public class Peer implements RMIRemote {
             Chunk chunk = file.getChunks().get(i);
             chunk.setDesiredReplicationDegree(replicationDegree);
 
-            String header = "PUTCHUNK " + "1.0" + " " + id + " " + file.getId() + " " + chunk.getNr() + " " + chunk.getDesiredReplicationDegree() + "\r\n\r\n";
-            System.out.println("Sented PUTCHUNK chunk size: " + chunk.getSize());
+            String header = "PUTCHUNK " + "1.0" + " " + this.id + " " + file.getId() + " " + chunk.getNr() + " " + chunk.getDesiredReplicationDegree() + "\r\n\r\n";
+            System.out.println("Sent PUTCHUNK chunk size: " + chunk.getSize());
 
             String key = file.getId() + "_" + chunk.getNr();
             if (!storage.getStoredOccurrences().containsKey(key)) {
@@ -109,7 +109,23 @@ public class Peer implements RMIRemote {
     }
 
     public void restore(String filepath) {
+        for (int i = 0; i < storage.getFiles().size(); i++) {
+            if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) {
+                for (int j = 0; j < storage.getFiles().get(i).getChunks().size(); i++) {
 
+                    String header = "GETCHUNK " + "1.0" + " " + this.id + " " + storage.getFiles().get(i).getId() + " " + storage.getFiles().get(i).getChunks().get(j).getNr() + "\r\n\r\n";
+                    System.out.println("Sent GETCHUNK");
+
+                    try {
+                        SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MC");
+
+                        exec.execute(sendThread);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else System.out.println("ERROR: File was never backed up.");
+        }
     }
 
     public void delete(String filepath) {
@@ -117,14 +133,16 @@ public class Peer implements RMIRemote {
         for (int i = 0; i < storage.getFiles().size(); i++) {
             if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) {
 
-                String header = "DELETE " + "1.0" + " " + id + " " + storage.getFiles().get(i).getId() + "\r\n\r\n";
+                for (int j = 0; j < 3; j++) {
+                    String header = "DELETE " + "1.0" + " " + this.id + " " + storage.getFiles().get(i).getId() + "\r\n\r\n";
 
-                try {
-                    SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MDB");
+                    try {
+                        SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MDB");
 
-                    exec.execute(sendThread);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                        exec.execute(sendThread);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                 }
 
             } else return;
@@ -134,15 +152,15 @@ public class Peer implements RMIRemote {
     public void reclaim(int diskSpaceToReclaim) {
 
         storage.fillCurrRDChunks();
-        storage.getChunks().sort(Collections.reverseOrder());
+        storage.getStoredChunks().sort(Collections.reverseOrder());
 
         ArrayList<Integer> indexsToDelete = new ArrayList<>();
 
         int total= 0;
-        for(int i = 0; i < storage.getChunks().size(); i++){
+        for(int i = 0; i < storage.getStoredChunks().size(); i++){
             if(total< diskSpaceToReclaim){
                 indexsToDelete.add(i);
-                total = total + storage.getChunks().get(i).getSize();
+                total = total + storage.getStoredChunks().get(i).getSize();
             }
             else{
                 break;
@@ -150,7 +168,7 @@ public class Peer implements RMIRemote {
         }
 
         for (int j = 0; j < indexsToDelete.size(); j++){
-            Chunk chunk = storage.getChunks().get(j);
+            Chunk chunk = storage.getStoredChunks().get(j);
 
                 String header = "REMOVED " + "1.0" + " " + id + " " + chunk.getFileID() + " " + chunk.getNr()  + "\r\n\r\n";
                 System.out.println("Sent REMOVED "+ chunk.getFileID() +" " + chunk.getNr() +" size: " + chunk.getSize() + " RD: " + chunk.getCurrReplicationDegree());
@@ -161,7 +179,7 @@ public class Peer implements RMIRemote {
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-            storage.getChunks().remove(j);
+            storage.getStoredChunks().remove(j);
 
             String filename = Peer.getId() + "/" + chunk.getOwner() + "_" + chunk.getFileID() + "_" + chunk.getNr();
             File file = new File(filename);
@@ -191,9 +209,9 @@ public class Peer implements RMIRemote {
 
         //Each chunk it stores
         System.out.println("\n> For each chunk it stores!");
-        for (int i = 0; i < storage.getChunks().size(); i++) {
-            int chunkNr = storage.getChunks().get(i).getNr();
-            String key = storage.getChunks().get(i).getFileID() + '_' + chunkNr;
+        for (int i = 0; i < storage.getStoredChunks().size(); i++) {
+            int chunkNr = storage.getStoredChunks().get(i).getNr();
+            String key = storage.getStoredChunks().get(i).getFileID() + '_' + chunkNr;
             System.out.println("CHUNK ID: " + chunkNr);
             System.out.println("CHUNK PERCEIVED REPLICATION DEGREE: " + storage.getStoredOccurrences().get(key) + "\n");
         }
