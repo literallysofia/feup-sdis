@@ -83,9 +83,9 @@ public class Peer implements RMIRemote {
             chunk.setDesiredReplicationDegree(replicationDegree);
 
             String header = "PUTCHUNK " + "1.0" + " " + this.id + " " + file.getId() + " " + chunk.getNr() + " " + chunk.getDesiredReplicationDegree() + "\r\n\r\n";
+            System.out.println("Sented PUTCHUNK chunk size: " + chunk.getSize());
 
             String key = file.getId() + "_" + chunk.getNr();
-
             if (!this.storage.getStoredOccurrences().containsKey(key)) {
                 Peer.getStorage().getStoredOccurrences().put(key, 0);
             }

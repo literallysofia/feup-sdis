@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -10,13 +11,15 @@ public class PutchunkReceivedThread implements Runnable {
     private String fileId;
     private int chunkNr;
     private int replicationDegree;
+    private byte[] content;
 
-    public PutchunkReceivedThread(Double version, int senderId, String fileId, int chunkNr, int replicationDegree) {
+    public PutchunkReceivedThread(Double version, int senderId, String fileId, int chunkNr, int replicationDegree, byte [] content) {
         this.version = version;
         this.senderId = senderId;
         this.fileId = fileId;
         this.chunkNr = chunkNr;
         this.replicationDegree = replicationDegree;
+        this.content=content;
     }
 
     @Override
@@ -24,7 +27,7 @@ public class PutchunkReceivedThread implements Runnable {
         String key = fileId + "_" + chunkNr;
         if (Peer.getStorage().getStoredOccurrences().get(key) < replicationDegree) {
 
-            Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree);
+            Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree, content.length);
 
             if (!Peer.getStorage().addChunk(chunk))
                 return;
@@ -37,6 +40,11 @@ public class PutchunkReceivedThread implements Runnable {
                     file.getParentFile().mkdirs();
                     file.createNewFile();
                 }
+
+                try (FileOutputStream fos = new FileOutputStream(filename)) {
+                    fos.write(content);
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

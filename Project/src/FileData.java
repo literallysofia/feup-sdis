@@ -46,12 +46,12 @@ public class FileData {
         try (FileInputStream fis = new FileInputStream(this.file);
              BufferedInputStream bis = new BufferedInputStream(fis)) {
 
-            int bytesAmount = 0;
+            int bytesAmount;
             while ((bytesAmount = bis.read(buffer)) > 0) {
                 byte[] body = Arrays.copyOf(buffer, bytesAmount);
 
                 chunkNr++;
-                Chunk chunk = new Chunk(chunkNr, body);
+                Chunk chunk = new Chunk(chunkNr, body, bytesAmount);
                 this.chunks.add(chunk);
                 buffer = new byte[sizeOfChunks];
             }

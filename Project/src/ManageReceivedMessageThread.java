@@ -68,7 +68,7 @@ public class ManageReceivedMessageThread implements Runnable {
         if (Peer.getId() != senderId) {
             Random random = new Random();
             System.out.println("Received PUTCHUNK Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr + " replicationDegree: " + replicationDegree);
-            Peer.getExec().schedule(new PutchunkReceivedThread(version, senderId, fileId, chunkNr, replicationDegree), random.nextInt(401), TimeUnit.MILLISECONDS);
+            Peer.getExec().schedule(new PutchunkReceivedThread(version, senderId, fileId, chunkNr, replicationDegree, body), random.nextInt(401), TimeUnit.MILLISECONDS);
         }
     }
 
