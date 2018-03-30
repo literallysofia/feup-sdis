@@ -5,7 +5,6 @@ public class Chunk implements Comparable {
     private int desiredReplicationDegree;
     private int currReplicationDegree = 0;
     private int size;
-    private int owner;
 
     public Chunk(int nr, byte[] content, int size) {
         this.nr = nr;
@@ -13,12 +12,11 @@ public class Chunk implements Comparable {
         this.size = size;
     }
 
-    public Chunk(int nr, String fileID, int desiredReplicationDegree, int size, int owner) {
+    public Chunk(int nr, String fileID, int desiredReplicationDegree, int size) {
         this.nr = nr;
         this.desiredReplicationDegree = desiredReplicationDegree;
         this.fileID = fileID;
         this.size = size;
-        this.owner = owner;
     }
 
     public int getNr() {
@@ -58,7 +56,4 @@ public class Chunk implements Comparable {
         return this.getCurrReplicationDegree()-((Chunk)c2).getCurrReplicationDegree();
     }
 
-    public int getOwner() {
-        return owner;
-    }
 }

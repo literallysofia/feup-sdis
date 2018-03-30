@@ -84,7 +84,7 @@ public class Storage {
     public void deleteStoredChunks(String fileID, int senderId) {
         for (int i = 0; i < this.storedChunks.size(); i++) {
             if (this.storedChunks.get(i).getFileID().equals(fileID)) {
-                String filename = Peer.getId() + "/" + senderId + "_" + fileID + "_" + this.storedChunks.get(i).getNr();
+                String filename = Peer.getId() + "/" + fileID + "_" + this.storedChunks.get(i).getNr();
                 File file = new File(filename);
                 file.delete();
                 this.storedChunks.remove(i);

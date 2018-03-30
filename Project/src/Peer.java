@@ -181,7 +181,7 @@ public class Peer implements RMIRemote {
                 }
             storage.getStoredChunks().remove(j);
 
-            String filename = Peer.getId() + "/" + chunk.getOwner() + "_" + chunk.getFileID() + "_" + chunk.getNr();
+            String filename = Peer.getId() + "/" + chunk.getFileID() + "_" + chunk.getNr();
             File file = new File(filename);
             file.delete();
         }

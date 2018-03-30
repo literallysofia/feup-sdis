@@ -27,13 +27,13 @@ public class PutchunkReceivedThread implements Runnable {
         String key = fileId + "_" + chunkNr;
         if (Peer.getStorage().getStoredOccurrences().get(key) < replicationDegree) {
 
-            Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree, content.length, senderId);
+            Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree, content.length);
 
             if (!Peer.getStorage().addStoredChunk(chunk))
                 return;
 
             try {
-                String filename = Peer.getId() + "/" + senderId + "_" + fileId + "_" + chunkNr;
+                String filename = Peer.getId() + "/" + fileId + "_" + chunkNr;
 
                 File file = new File(filename);
                 if (!file.exists()) {
