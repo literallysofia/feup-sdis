@@ -1,8 +1,9 @@
 import java.io.*;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +74,7 @@ public class Peer implements RMIRemote {
     }
 
 
-    public void backup(String filepath, int replicationDegree) throws RemoteException {
+    public synchronized void backup(String filepath, int replicationDegree) {
 
         FileData file = new FileData(filepath, replicationDegree);
         storage.addFile(file);
@@ -86,7 +87,7 @@ public class Peer implements RMIRemote {
             System.out.println("Sent PUTCHUNK chunk size: " + chunk.getSize());
 
             String key = file.getId() + "_" + chunk.getNr();
-            if (!this.storage.getStoredOccurrences().containsKey(key)) {
+            if (!storage.getStoredOccurrences().containsKey(key)) {
                 Peer.getStorage().getStoredOccurrences().put(key, 0);
             }
 
@@ -107,7 +108,7 @@ public class Peer implements RMIRemote {
         }
     }
 
-    public void restore(String filepath) throws RemoteException {
+    public void restore(String filepath) {
         for (int i = 0; i < storage.getFiles().size(); i++) {
             if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) { //if file exists
                 for (int j = 0; j < storage.getFiles().get(i).getChunks().size(); j++) { //if file has backedup chunks
@@ -127,7 +128,7 @@ public class Peer implements RMIRemote {
         }
     }
 
-    public void delete(String filepath) throws RemoteException {
+    public void delete(String filepath) {
 
         for (int i = 0; i < storage.getFiles().size(); i++) {
             if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) {
@@ -148,11 +149,46 @@ public class Peer implements RMIRemote {
         }
     }
 
-    public void reclaim(int diskSpaceToReclaim) throws RemoteException {
+    public void reclaim(int diskSpaceToReclaim) {
+
+        storage.fillCurrRDChunks();
+        storage.getStoredChunks().sort(Collections.reverseOrder());
+
+        ArrayList<Integer> indexsToDelete = new ArrayList<>();
+
+        int total= 0;
+        for(int i = 0; i < storage.getStoredChunks().size(); i++){
+            if(total< diskSpaceToReclaim){
+                indexsToDelete.add(i);
+                total = total + storage.getStoredChunks().get(i).getSize();
+            }
+            else{
+                break;
+            }
+        }
+
+        for (int j = 0; j < indexsToDelete.size(); j++){
+            Chunk chunk = storage.getStoredChunks().get(j);
+
+                String header = "REMOVED " + "1.0" + " " + id + " " + chunk.getFileID() + " " + chunk.getNr()  + "\r\n\r\n";
+                System.out.println("Sent REMOVED "+ chunk.getFileID() +" " + chunk.getNr() +" size: " + chunk.getSize() + " RD: " + chunk.getCurrReplicationDegree());
+                try {
+                    byte[] asciiHeader = header.getBytes("US-ASCII");
+                    SendMessageThread sendThread = new SendMessageThread(asciiHeader, "MC");
+                    exec.execute(sendThread);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            storage.getStoredChunks().remove(j);
+
+            String filename = Peer.getId() + "/" + chunk.getFileID() + "_" + chunk.getNr();
+            File file = new File(filename);
+            file.delete();
+        }
 
     }
 
-    public void state() throws RemoteException {
+    public void state() {
         //Each file whose backup it has initiated
         System.out.println("\n> For each file whose backup it has initiated!");
         for (int i = 0; i < storage.getFiles().size(); i++) {

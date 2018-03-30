@@ -32,7 +32,7 @@ public class PutchunkReceivedThread implements Runnable {
                 return;
 
             try {
-                String filename = Peer.getId() + "/" + senderId + "_" + fileId + "_" + chunkNr;
+                String filename = Peer.getId() + "/" + fileId + "_" + chunkNr;
 
                 File file = new File(filename);
                 if (!file.exists()) {
@@ -50,13 +50,7 @@ public class PutchunkReceivedThread implements Runnable {
             Peer.getStorage().incStoredChunk(fileId, chunkNr);
             String header = "STORED " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr + "\r\n\r\n";
             System.out.println("Sent " + header);
-            SendMessageThread sendThread = null;
-            try {
-                sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MC");
-                Peer.getExec().execute(sendThread);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            Peer.getMC().sendMessage(header.getBytes());
         }
 
 

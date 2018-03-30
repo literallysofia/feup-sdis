@@ -1,4 +1,4 @@
-public class Chunk {
+public class Chunk implements Comparable {
     private int nr;
     private byte[] content;
     private String fileID;
@@ -50,4 +50,10 @@ public class Chunk {
     public int getSize() {
         return size;
     }
+
+    @Override
+    public int compareTo(Object c2) {
+        return this.getCurrReplicationDegree()-((Chunk)c2).getCurrReplicationDegree();
+    }
+
 }

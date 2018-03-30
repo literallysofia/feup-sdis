@@ -1,5 +1,6 @@
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Storage {
@@ -75,25 +76,15 @@ public class Storage {
 
     public void incStoredChunk(String fileID, int chunkNr) {
         String key = fileID + '_' + chunkNr;
-
-        /*if (this.storedOccurrences.putIfAbsent(key, 1) != null) {
-            int total = this.storedOccurrences.get(key);
-            this.storedOccurrences.replace(key, total++);
-        }*/
-
-        //if(this.storedOccurrences.containsKey(key)) {
         int total = this.storedOccurrences.get(key) + 1;
         this.storedOccurrences.replace(key, total);
-        //}
-        //else{
-        //  this.storedOccurrences.put(key, 1);
-        //}
+
     }
 
     public void deleteStoredChunks(String fileID, int senderId) {
         for (int i = 0; i < this.storedChunks.size(); i++) {
             if (this.storedChunks.get(i).getFileID().equals(fileID)) {
-                String filename = Peer.getId() + "/" + senderId + "_" + fileID + "_" + this.storedChunks.get(i).getNr();
+                String filename = Peer.getId() + "/" + fileID + "_" + this.storedChunks.get(i).getNr();
                 File file = new File(filename);
                 file.delete();
                 this.storedChunks.remove(i);
@@ -101,4 +92,10 @@ public class Storage {
         }
     }
 
+    public void fillCurrRDChunks(){
+        for (int i = 0; i < this.storedChunks.size(); i++) {
+            String key = this.storedChunks.get(i).getFileID()+"_"+this.storedChunks.get(i).getNr();
+            this.storedChunks.get(i).setCurrReplicationDegree(this.storedOccurrences.get(key));
+        }
+    }
 }

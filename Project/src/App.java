@@ -55,7 +55,7 @@ public class App {
                 peer.delete(filePath);
             } else if (args[1].equals("RECLAIM")) {
 
-                if (args.length != 2) {
+                if (args.length != 3) {
                     System.out.println("ERROR: Reclaim format must be: > RECLAIM <disk_space_to_reclaim>");
                     return;
                 }
