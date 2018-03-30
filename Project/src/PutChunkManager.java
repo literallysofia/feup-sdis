@@ -22,8 +22,7 @@ public class PutChunkManager implements Runnable {
 
         if (occurrences < replicationDegree) {
             System.out.println("Sented PUTCHUNK");
-            SendMessageThread sendThread = new SendMessageThread(message, "MDB");
-            Peer.getExec().execute(sendThread);
+            Peer.getMDB().sendMessage(message);
 
             this.time = 2 * this.time;
             this.counter++;

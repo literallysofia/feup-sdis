@@ -1,5 +1,6 @@
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Storage {
@@ -55,19 +56,9 @@ public class Storage {
 
     public void incStoredChunk(String fileID, int chuckNr) {
         String key = fileID + '_' + chuckNr;
-
-        /*if (this.storedOccurrences.putIfAbsent(key, 1) != null) {
-            int total = this.storedOccurrences.get(key);
-            this.storedOccurrences.replace(key, total++);
-        }*/
-
-        //if(this.storedOccurrences.containsKey(key)) {
         int total = this.storedOccurrences.get(key) + 1;
         this.storedOccurrences.replace(key, total);
-        //}
-        //else{
-        //  this.storedOccurrences.put(key, 1);
-        //}
+
     }
 
     public void deleteChunks(String fileID, int senderId) {
@@ -83,4 +74,10 @@ public class Storage {
 
     }
 
+    public void fillCurrRDChunks(){
+        for (int i = 0; i < this.chunks.size(); i++) {
+            String key = this.chunks.get(i).getFileID()+"_"+this.chunks.get(i).getNr();
+            this.chunks.get(i).setCurrReplicationDegree(this.storedOccurrences.get(key));
+        }
+    }
 }

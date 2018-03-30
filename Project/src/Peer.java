@@ -1,8 +1,9 @@
 import java.io.*;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +74,7 @@ public class Peer implements RMIRemote {
     }
 
 
-    public void backup(String filepath, int replicationDegree) throws RemoteException {
+    public synchronized void backup(String filepath, int replicationDegree) {
 
         FileData file = new FileData(filepath, replicationDegree);
         storage.addFile(file);
@@ -82,11 +83,11 @@ public class Peer implements RMIRemote {
             Chunk chunk = file.getChunks().get(i);
             chunk.setDesiredReplicationDegree(replicationDegree);
 
-            String header = "PUTCHUNK " + "1.0" + " " + this.id + " " + file.getId() + " " + chunk.getNr() + " " + chunk.getDesiredReplicationDegree() + "\r\n\r\n";
+            String header = "PUTCHUNK " + "1.0" + " " + id + " " + file.getId() + " " + chunk.getNr() + " " + chunk.getDesiredReplicationDegree() + "\r\n\r\n";
             System.out.println("Sented PUTCHUNK chunk size: " + chunk.getSize());
 
             String key = file.getId() + "_" + chunk.getNr();
-            if (!this.storage.getStoredOccurrences().containsKey(key)) {
+            if (!storage.getStoredOccurrences().containsKey(key)) {
                 Peer.getStorage().getStoredOccurrences().put(key, 0);
             }
 
@@ -107,16 +108,16 @@ public class Peer implements RMIRemote {
         }
     }
 
-    public void restore(String filepath) throws RemoteException {
+    public void restore(String filepath) {
 
     }
 
-    public void delete(String filepath) throws RemoteException {
+    public void delete(String filepath) {
 
         for (int i = 0; i < storage.getFiles().size(); i++) {
             if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) {
 
-                String header = "DELETE " + "1.0" + " " + this.id + " " + storage.getFiles().get(i).getId() + "\r\n\r\n";
+                String header = "DELETE " + "1.0" + " " + id + " " + storage.getFiles().get(i).getId() + "\r\n\r\n";
 
                 try {
                     SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MDB");
@@ -130,11 +131,46 @@ public class Peer implements RMIRemote {
         }
     }
 
-    public void reclaim(int diskSpaceToReclaim) throws RemoteException {
+    public void reclaim(int diskSpaceToReclaim) {
+
+        storage.fillCurrRDChunks();
+        storage.getChunks().sort(Collections.reverseOrder());
+
+        ArrayList<Integer> indexsToDelete = new ArrayList<>();
+
+        int total= 0;
+        for(int i = 0; i < storage.getChunks().size(); i++){
+            if(total< diskSpaceToReclaim){
+                indexsToDelete.add(i);
+                total = total + storage.getChunks().get(i).getSize();
+            }
+            else{
+                break;
+            }
+        }
+
+        for (int j = 0; j < indexsToDelete.size(); j++){
+            Chunk chunk = storage.getChunks().get(j);
+
+                String header = "REMOVED " + "1.0" + " " + id + " " + chunk.getFileID() + " " + chunk.getNr()  + "\r\n\r\n";
+                System.out.println("Sent REMOVED "+ chunk.getFileID() +" " + chunk.getNr() +" size: " + chunk.getSize() + " RD: " + chunk.getCurrReplicationDegree());
+                try {
+                    byte[] asciiHeader = header.getBytes("US-ASCII");
+                    SendMessageThread sendThread = new SendMessageThread(asciiHeader, "MC");
+                    exec.execute(sendThread);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            storage.getChunks().remove(j);
+
+            String filename = Peer.getId() + "/" + chunk.getOwner() + "_" + chunk.getFileID() + "_" + chunk.getNr();
+            File file = new File(filename);
+            file.delete();
+        }
 
     }
 
-    public void state() throws RemoteException {
+    public void state() {
         //Each file whose backup it has initiated
         System.out.println("\n> For each file whose backup it has initiated!");
         for (int i = 0; i < storage.getFiles().size(); i++) {

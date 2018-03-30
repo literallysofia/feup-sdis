@@ -31,6 +31,7 @@ public class ManageReceivedMessageThread implements Runnable {
                 manageDelete();
                 break;
             case "REMOVED":
+                manageRemoved();
                 break;
             //BACKUP
             case "PUTCHUNK":
@@ -44,7 +45,7 @@ public class ManageReceivedMessageThread implements Runnable {
         }
     }
 
-    private void managePutchunk() {
+    private  synchronized void managePutchunk() {
 
         List<byte[]> headerAndBody = getHeaderAndBody();
         byte[] header = headerAndBody.get(0);
@@ -72,7 +73,7 @@ public class ManageReceivedMessageThread implements Runnable {
         }
     }
 
-    private void manageStored() {
+    private synchronized void manageStored() {
 
         List<byte[]> headerAndBody = getHeaderAndBody();
         byte[] header = headerAndBody.get(0);
@@ -131,5 +132,24 @@ public class ManageReceivedMessageThread implements Runnable {
         headerAndBody.add(body);
 
         return headerAndBody;
+    }
+
+    private void manageRemoved() {
+
+        List<byte[]> headerAndBody = getHeaderAndBody();
+        byte[] header = headerAndBody.get(0);
+
+        String headerStr = new String(header);
+        String trimmedStr = headerStr.trim();
+        String[] headerArray = trimmedStr.split(" ");
+
+        Double version = Double.parseDouble(headerArray[1].trim());
+        int senderId = Integer.parseInt(headerArray[2].trim());
+        String fileId = headerArray[3].trim();
+        int chunkNr = Integer.parseInt(headerArray[4].trim());
+
+        if (Peer.getId() != senderId) {
+            System.out.println("Received REMOVED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
+        }
     }
 }

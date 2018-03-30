@@ -27,7 +27,7 @@ public class PutchunkReceivedThread implements Runnable {
         String key = fileId + "_" + chunkNr;
         if (Peer.getStorage().getStoredOccurrences().get(key) < replicationDegree) {
 
-            Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree, content.length);
+            Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree, content.length, senderId);
 
             if (!Peer.getStorage().addChunk(chunk))
                 return;
@@ -51,13 +51,7 @@ public class PutchunkReceivedThread implements Runnable {
             Peer.getStorage().incStoredChunk(fileId, chunkNr);
             String header = "STORED " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr + "\r\n\r\n";
             System.out.println("Sent " + header);
-            SendMessageThread sendThread = null;
-            try {
-                sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MC");
-                Peer.getExec().execute(sendThread);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            Peer.getMC().sendMessage(header.getBytes());
         }
 
 
