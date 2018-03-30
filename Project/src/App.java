@@ -37,7 +37,7 @@ public class App {
                 peer.backup(filePath, replicationDegree);
             } else if (args[1].equals("RESTORE")) {
 
-                if (args.length != 2) {
+                if (args.length != 3) {
                     System.out.println("ERROR: Restore format must be: > RESTORE <file_path>");
                     return;
                 }

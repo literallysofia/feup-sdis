@@ -29,7 +29,7 @@ public class PutchunkReceivedThread implements Runnable {
 
             Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree, content.length);
 
-            if (!Peer.getStorage().addChunk(chunk))
+            if (!Peer.getStorage().addStoredChunk(chunk))
                 return;
 
             try {

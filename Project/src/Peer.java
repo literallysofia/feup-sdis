@@ -83,7 +83,7 @@ public class Peer implements RMIRemote {
             chunk.setDesiredReplicationDegree(replicationDegree);
 
             String header = "PUTCHUNK " + "1.0" + " " + this.id + " " + file.getId() + " " + chunk.getNr() + " " + chunk.getDesiredReplicationDegree() + "\r\n\r\n";
-            System.out.println("Sented PUTCHUNK chunk size: " + chunk.getSize());
+            System.out.println("Sent PUTCHUNK chunk size: " + chunk.getSize());
 
             String key = file.getId() + "_" + chunk.getNr();
             if (!this.storage.getStoredOccurrences().containsKey(key)) {
@@ -108,7 +108,23 @@ public class Peer implements RMIRemote {
     }
 
     public void restore(String filepath) throws RemoteException {
+        for (int i = 0; i < storage.getFiles().size(); i++) {
+            if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) {
+                for (int j = 0; j < storage.getFiles().get(i).getChunks().size(); i++) {
 
+                    String header = "GETCHUNK " + "1.0" + " " + this.id + " " + storage.getFiles().get(i).getId() + " " + storage.getFiles().get(i).getChunks().get(j).getNr() + "\r\n\r\n";
+                    System.out.println("Sent GETCHUNK");
+
+                    try {
+                        SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MC");
+
+                        exec.execute(sendThread);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else System.out.println("ERROR: File was never backed up.");
+        }
     }
 
     public void delete(String filepath) throws RemoteException {
@@ -155,9 +171,9 @@ public class Peer implements RMIRemote {
 
         //Each chunk it stores
         System.out.println("\n> For each chunk it stores!");
-        for (int i = 0; i < storage.getChunks().size(); i++) {
-            int chunkNr = storage.getChunks().get(i).getNr();
-            String key = storage.getChunks().get(i).getFileID() + '_' + chunkNr;
+        for (int i = 0; i < storage.getStoredChunks().size(); i++) {
+            int chunkNr = storage.getStoredChunks().get(i).getNr();
+            String key = storage.getStoredChunks().get(i).getFileID() + '_' + chunkNr;
             System.out.println("CHUNK ID: " + chunkNr);
             System.out.println("CHUNK PERCEIVED REPLICATION DEGREE: " + storage.getStoredOccurrences().get(key) + "\n");
         }
