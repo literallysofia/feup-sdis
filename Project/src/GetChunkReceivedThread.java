@@ -3,27 +3,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-public class PutchunkReceivedThread implements Runnable {
+public class GetChunkReceivedThread implements Runnable {
 
-    Double version;
+    private Double version;
     private int senderId;
     private String fileId;
     private int chunkNr;
-    private int replicationDegree;
-    private byte[] content;
 
-    public PutchunkReceivedThread(Double version, int senderId, String fileId, int chunkNr, int replicationDegree, byte [] content) {
+    public GetChunkReceivedThread(Double version, int senderId, String fileId, int chunkNr) {
         this.version = version;
         this.senderId = senderId;
         this.fileId = fileId;
         this.chunkNr = chunkNr;
-        this.replicationDegree = replicationDegree;
-        this.content=content;
     }
 
     @Override
     public void run() {
-        String key = fileId + "_" + chunkNr;
+        /*String key = fileId + "_" + chunkNr;
         if (Peer.getStorage().getStoredOccurrences().get(key) < replicationDegree) {
 
             Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree, content.length);
@@ -57,7 +53,7 @@ public class PutchunkReceivedThread implements Runnable {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
 
 
     }

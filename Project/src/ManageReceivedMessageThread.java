@@ -26,6 +26,7 @@ public class ManageReceivedMessageThread implements Runnable {
                 manageStored();
                 break;
             case "GETCHUNK":
+                manageGetChunk();
                 break;
             case "DELETE":
                 manageDelete();
@@ -109,6 +110,27 @@ public class ManageReceivedMessageThread implements Runnable {
 
         if (Peer.getId() != senderId) {
             System.out.println("Received DELETE Version: " + version + " SenderId: " + senderId + " fileId: " + fileId);
+        }
+    }
+
+    private void manageGetChunk() {
+
+        List<byte[]> headerAndBody = getHeaderAndBody();
+        byte[] header = headerAndBody.get(0);
+
+        String headerStr = new String(header);
+        String trimmedStr = headerStr.trim();
+        String[] headerArray = trimmedStr.split(" ");
+
+        Double version = Double.parseDouble(headerArray[1].trim());
+        int senderId = Integer.parseInt(headerArray[2].trim());
+        String fileId = headerArray[3].trim();
+        int chunkNr = Integer.parseInt(headerArray[4].trim());
+
+        if (Peer.getId() != senderId) {
+            Random random = new Random();
+            System.out.println("Received GETCHUNK Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
+            Peer.getExec().schedule(new GetChunkReceivedThread(version, senderId, fileId, chunkNr), random.nextInt(401), TimeUnit.MILLISECONDS);
         }
     }
 
