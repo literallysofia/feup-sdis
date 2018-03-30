@@ -1,12 +1,13 @@
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class Peer implements RMIRemote {
 
@@ -109,6 +110,8 @@ public class Peer implements RMIRemote {
     }
 
     public void restore(String filepath) {
+        String fileName = "";
+
         for (int i = 0; i < storage.getFiles().size(); i++) {
             if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) { //if file exists
                 for (int j = 0; j < storage.getFiles().get(i).getChunks().size(); j++) { //if file has backedup chunks
@@ -117,6 +120,7 @@ public class Peer implements RMIRemote {
                     System.out.println("Sent GETCHUNK");
 
                     storage.addWantedChunk(storage.getFiles().get(i).getId(), storage.getFiles().get(i).getChunks().get(j).getNr());
+                    fileName = storage.getFiles().get(i).getFile().getName();
 
                     try {
                         SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MC");
@@ -127,7 +131,13 @@ public class Peer implements RMIRemote {
                     }
                 }
 
-                while (storage.getWantedChunks().containsValue("no content")) {
+                while (!isComplete()) {
+                }
+
+                try {
+                    restoreFile(fileName);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
                 System.out.println("CHUNKS TODOS!!!");
             } else System.out.println("ERROR: File was never backed up.");
@@ -220,6 +230,55 @@ public class Peer implements RMIRemote {
             System.out.println("CHUNK ID: " + chunkNr);
             System.out.println("CHUNK PERCEIVED REPLICATION DEGREE: " + storage.getStoredOccurrences().get(key) + "\n");
         }
+    }
+
+    private void restoreFile(String fileName) throws IOException {
+        List<byte[]> bytesList = new ArrayList<>();
+
+        List<String> sortedChunkKeys = new ArrayList<>(storage.getWantedChunks().keySet());
+        Collections.sort(sortedChunkKeys);
+
+        for (String key : sortedChunkKeys) {
+            byte[] bytes = storage.getWantedChunks().get(key);
+            bytesList.add(bytes);
+            /*System.out.println('\n' + key);
+
+            for (int i = 0; i < storage.getFiles().size(); i++) {
+                if (storage.getFiles().get(i).getFile().getPath().equals("/Users/sofiasilva/Documents/GitHub/feup-sdis/Project/src/lil.txt")) { //if file exists
+                    for (int j = 0; j < storage.getFiles().get(i).getChunks().size(); j++) { //if file has backedup chunks
+                        System.out.println('\n' + storage.getFiles().get(i).getChunks().get(j).getContent().toString() + '\n');
+                    }
+                }
+            }
+            System.out.println('\n' + bytes.toString());*/
+        }
+
+        String filename = Peer.getId() + "/" + fileName;
+
+        File file = new File(filename);
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+            file.createNewFile();
+        }
+
+        FileOutputStream fos = new FileOutputStream(filename);
+        try {
+            Iterator<byte[]> it = bytesList.iterator();
+            while (it.hasNext())
+                fos.write(it.next());
+        } finally {
+            fos.close();
+        }
 
     }
+
+    private boolean isComplete() {
+        for (String key : storage.getWantedChunks().keySet()) {
+            if (storage.getWantedChunks().get(key).length == 1)
+                return false;
+        }
+        return true;
+    }
+
+
 }

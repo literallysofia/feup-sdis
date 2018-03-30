@@ -1,3 +1,5 @@
+import javafx.util.Pair;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,7 +32,7 @@ public class Storage {
      * key = <fileID>_<ChunkNo>
      * content = chunk's content (null if not received)
      */
-    private ConcurrentHashMap<String, Object> wantedChunks;
+    private ConcurrentHashMap<String, byte[]> wantedChunks;
 
     public Storage() {
         this.files = new ArrayList<>();
@@ -56,7 +58,7 @@ public class Storage {
         return this.storedOccurrences;
     }
 
-    public ConcurrentHashMap<String, Object> getWantedChunks() {
+    public ConcurrentHashMap<String, byte[]> getWantedChunks() {
         return this.wantedChunks;
     }
 
@@ -89,7 +91,8 @@ public class Storage {
 
     public void addWantedChunk(String fileID, int chunkNr) {
         String key = fileID + '_' + chunkNr;
-        this.wantedChunks.put(key, "no content");
+        byte[] bytes = new byte[1];;
+        this.wantedChunks.put(key, bytes);
     }
 
     public void addWantedChunkContent(String fileID, int chunkNr, byte[] content) {
