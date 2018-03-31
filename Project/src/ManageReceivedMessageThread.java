@@ -87,6 +87,7 @@ public class ManageReceivedMessageThread implements Runnable {
         String fileId = headerArray[3].trim();
         int chunkNr = Integer.parseInt(headerArray[4].trim());
 
+
         if (Peer.getId() != senderId) {
             Peer.getStorage().incStoredChunk(fileId, chunkNr);
             System.out.println("Received STORED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
@@ -105,10 +106,11 @@ public class ManageReceivedMessageThread implements Runnable {
         Double version = Double.parseDouble(headerArray[1].trim());
         int senderId = Integer.parseInt(headerArray[2].trim());
         String fileId = headerArray[3].trim();
-
-        Peer.getStorage().deleteStoredChunks(fileId, senderId);
+        int chunkNr =  Integer.parseInt(headerArray[4].trim());
 
         if (Peer.getId() != senderId) {
+            Peer.getStorage().decStoredChunk(fileId, chunkNr);
+            Peer.getStorage().deleteStoredChunks(fileId, senderId);
             System.out.println("Received DELETE Version: " + version + " SenderId: " + senderId + " fileId: " + fileId);
         }
     }
@@ -147,7 +149,10 @@ public class ManageReceivedMessageThread implements Runnable {
         int chunkNr = Integer.parseInt(headerArray[4].trim());
 
         if (Peer.getId() != senderId) {
+            Peer.getStorage().decStoredChunk(fileId, chunkNr);
             System.out.println("Received REMOVED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
+            Random random = new Random();
+            Peer.getExec().schedule(new RemovedReceivedMessageThread(version, senderId, fileId, chunkNr), random.nextInt(401), TimeUnit.MILLISECONDS);
         }
     }
 }

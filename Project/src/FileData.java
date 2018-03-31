@@ -40,7 +40,7 @@ public class FileData {
     public void splitFile() {
         int chunkNr = 0;
 
-        int sizeOfChunks = 64000;// 1MB
+        int sizeOfChunks = 64000;
         byte[] buffer = new byte[sizeOfChunks];
 
         try (FileInputStream fis = new FileInputStream(this.file);

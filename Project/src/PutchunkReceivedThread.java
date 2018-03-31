@@ -6,7 +6,6 @@ import java.util.List;
 
 public class PutchunkReceivedThread implements Runnable {
 
-    Double version;
     private int senderId;
     private String fileId;
     private int chunkNr;
@@ -14,7 +13,7 @@ public class PutchunkReceivedThread implements Runnable {
     private byte[] content;
 
     public PutchunkReceivedThread(Double version, int senderId, String fileId, int chunkNr, int replicationDegree, byte [] content) {
-        this.version = version;
+        Double version1 = version;
         this.senderId = senderId;
         this.fileId = fileId;
         this.chunkNr = chunkNr;
@@ -25,6 +24,7 @@ public class PutchunkReceivedThread implements Runnable {
     @Override
     public void run() {
         String key = fileId + "_" + chunkNr;
+
         if (Peer.getStorage().getStoredOccurrences().get(key) < replicationDegree) {
 
             Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree, content.length);

@@ -37,7 +37,7 @@ public class Storage {
         return this.files;
     }
 
-    public ArrayList<Chunk> getStoredChunks() {
+    public synchronized ArrayList<Chunk> getStoredChunks() {
         return this.storedChunks;
     }
 
@@ -45,7 +45,7 @@ public class Storage {
         return this.receivedChunks;
     }
 
-    public ConcurrentHashMap<String, Integer> getStoredOccurrences() {
+    public synchronized ConcurrentHashMap<String, Integer> getStoredOccurrences() {
         return this.storedOccurrences;
     }
 
@@ -53,7 +53,7 @@ public class Storage {
         this.files.add(f);
     }
 
-    public boolean addStoredChunk(Chunk chunk) {
+    public synchronized boolean addStoredChunk(Chunk chunk) {
 
         for (int i = 0; i < this.storedChunks.size(); i++) {
             if (this.storedChunks.get(i).getFileID().equals(chunk.getFileID()) && this.storedChunks.get(i).getNr() == chunk.getNr())
@@ -74,9 +74,25 @@ public class Storage {
         }
     }
 
-    public void incStoredChunk(String fileID, int chunkNr) {
+    public synchronized void incStoredChunk(String fileID, int chunkNr) {
+
         String key = fileID + '_' + chunkNr;
-        int total = this.storedOccurrences.get(key) + 1;
+
+        if (!Peer.getStorage().getStoredOccurrences().containsKey(key)) {
+            Peer.getStorage().getStoredOccurrences().put(key, 1);
+        }
+        else{
+            int total = this.storedOccurrences.get(key) + 1;
+            this.storedOccurrences.replace(key, total);
+            System.out.println("INC " + chunkNr);
+        }
+
+    }
+
+    public synchronized void decStoredChunk(String fileID, int chunkNr) {
+        System.out.println("DEC " + chunkNr);
+        String key = fileID + '_' + chunkNr;
+        int total = this.storedOccurrences.get(key) - 1;
         this.storedOccurrences.replace(key, total);
 
     }

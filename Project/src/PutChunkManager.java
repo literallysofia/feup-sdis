@@ -21,6 +21,7 @@ public class PutChunkManager implements Runnable {
         int occurrences = Peer.getStorage().getStoredOccurrences().get(this.key);
 
         if (occurrences < replicationDegree) {
+
             Peer.getMDB().sendMessage(message);
             System.out.println("Sent PUTCHUNK");
             this.time = 2 * this.time;
