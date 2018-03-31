@@ -132,7 +132,6 @@ public class Peer implements RMIRemote {
                 while (storage.getWantedChunks().containsValue("false")) {
                     //waits if any chunks has not been received
                 }
-
                 restoreFile(fileName);
             } else System.out.println("ERROR: File was never backed up.");
         }

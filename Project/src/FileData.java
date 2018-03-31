@@ -56,6 +56,11 @@ public class FileData {
                 buffer = new byte[sizeOfChunks];
             }
 
+            if (this.file.length() % 64000 == 0) {
+                Chunk chunk = new Chunk(chunkNr, null, 0);
+                this.chunks.add(chunk);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
