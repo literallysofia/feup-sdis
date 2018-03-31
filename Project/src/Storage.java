@@ -34,6 +34,7 @@ public class Storage {
      */
     private ConcurrentHashMap<String, byte[]> wantedChunks;
 
+
     public Storage() {
         this.files = new ArrayList<>();
         this.storedChunks = new ArrayList<>();
@@ -133,4 +134,5 @@ public class Storage {
             this.storedChunks.get(i).setCurrReplicationDegree(this.storedOccurrences.get(key));
         }
     }
+
 }

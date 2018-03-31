@@ -194,7 +194,7 @@ public class Peer implements RMIRemote {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-            storage.getStoredChunks().remove(j);
+            storage.getStoredChunks().remove(indexsToDelete.get(j));
 
             String filename = Peer.getId() + "/" + chunk.getFileID() + "_" + chunk.getNr();
             File file = new File(filename);
