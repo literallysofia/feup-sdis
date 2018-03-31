@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 
 public class PutchunkReceivedThread implements Runnable {
 
+    private double version;
     private int senderId;
     private String fileId;
     private int chunkNr;
