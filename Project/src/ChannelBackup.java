@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.net.*;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 
 public class ChannelBackup implements Runnable {
     private final String INET_ADDR = "224.0.0.16";
@@ -40,7 +39,7 @@ public class ChannelBackup implements Runnable {
         // Create a buffer of bytes, which will be used to store
         // the incoming bytes containing the information from the server.
         // Since the message is small here, 256 bytes should be enough.
-        byte[] buf = new byte[64000];
+        byte[] buf = new byte[65000];
 
         // Create a new Multicast socket (that will allow other sockets/programs
         // to join it as well.

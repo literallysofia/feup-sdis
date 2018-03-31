@@ -53,7 +53,7 @@ public class Chunk implements Comparable {
 
     @Override
     public int compareTo(Object c2) {
-        return this.getCurrReplicationDegree()-((Chunk)c2).getCurrReplicationDegree();
+        return this.getCurrReplicationDegree() - ((Chunk) c2).getCurrReplicationDegree();
     }
 
 }

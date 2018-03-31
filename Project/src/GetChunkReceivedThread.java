@@ -1,10 +1,6 @@
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class GetChunkReceivedThread implements Runnable {
 
@@ -27,8 +23,10 @@ public class GetChunkReceivedThread implements Runnable {
 
                     String chunkPath = Peer.getId() + "/" + fileId + "_" + chunkNr;
 
-                    Path fileLocation = Paths.get(chunkPath);
-                    byte[] body = Files.readAllBytes(fileLocation);
+                    File file = new File(chunkPath);
+                    byte[] body = new byte[(int) file.length()];
+                    FileInputStream in = new FileInputStream(file);
+                    in.read(body);
 
                     byte[] message = new byte[asciiHeader.length + body.length];
                     System.arraycopy(asciiHeader, 0, message, 0, asciiHeader.length);
@@ -37,8 +35,6 @@ public class GetChunkReceivedThread implements Runnable {
                     SendMessageThread sendThread = new SendMessageThread(message, "MDR");
                     System.out.println("Sent CHUNK");
                     Peer.getExec().execute(sendThread);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
