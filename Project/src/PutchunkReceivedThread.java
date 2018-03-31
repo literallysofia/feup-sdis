@@ -2,7 +2,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 
 public class PutchunkReceivedThread implements Runnable {
 
@@ -12,13 +11,13 @@ public class PutchunkReceivedThread implements Runnable {
     private int replicationDegree;
     private byte[] content;
 
-    public PutchunkReceivedThread(Double version, int senderId, String fileId, int chunkNr, int replicationDegree, byte [] content) {
-        Double version1 = version;
+    public PutchunkReceivedThread(Double version, int senderId, String fileId, int chunkNr, int replicationDegree, byte[] content) {
+        this.version = version;
         this.senderId = senderId;
         this.fileId = fileId;
         this.chunkNr = chunkNr;
         this.replicationDegree = replicationDegree;
-        this.content=content;
+        this.content = content;
     }
 
     @Override
@@ -53,7 +52,5 @@ public class PutchunkReceivedThread implements Runnable {
             System.out.println("Sent " + header);
             Peer.getMC().sendMessage(header.getBytes());
         }
-
-
     }
 }

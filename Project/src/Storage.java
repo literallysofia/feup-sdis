@@ -1,6 +1,7 @@
+import javafx.util.Pair;
+
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Storage {
@@ -27,10 +28,18 @@ public class Storage {
      */
     private ConcurrentHashMap<String, Integer> storedOccurrences;
 
+    /*
+     * key = <fileID>_<ChunkNo>
+     * content = chunk's content (null if not received)
+     */
+    private ConcurrentHashMap<String, byte[]> wantedChunks;
+
     public Storage() {
         this.files = new ArrayList<>();
         this.storedChunks = new ArrayList<>();
+        this.receivedChunks = new ArrayList<>();
         this.storedOccurrences = new ConcurrentHashMap<>();
+        this.wantedChunks = new ConcurrentHashMap<>();
     }
 
     public ArrayList<FileData> getFiles() {
@@ -49,6 +58,10 @@ public class Storage {
         return this.storedOccurrences;
     }
 
+    public ConcurrentHashMap<String, byte[]> getWantedChunks() {
+        return this.wantedChunks;
+    }
+
     public void addFile(FileData f) {
         this.files.add(f);
     }
@@ -61,10 +74,6 @@ public class Storage {
         }
         this.storedChunks.add(chunk);
         return true;
-    }
-
-    public void addReceivedChunk(Chunk chunk) {
-        this.receivedChunks.add(chunk);
     }
 
     public void deleteReceivedChunk(Chunk chunk) {
@@ -94,7 +103,17 @@ public class Storage {
         String key = fileID + '_' + chunkNr;
         int total = this.storedOccurrences.get(key) - 1;
         this.storedOccurrences.replace(key, total);
+    }
 
+    public void addWantedChunk(String fileID, int chunkNr) {
+        String key = fileID + '_' + chunkNr;
+        byte[] bytes = new byte[1];;
+        this.wantedChunks.put(key, bytes);
+    }
+
+    public void addWantedChunkContent(String fileID, int chunkNr, byte[] content) {
+        String key = fileID + '_' + chunkNr;
+        this.wantedChunks.replace(key, content);
     }
 
     public void deleteStoredChunks(String fileID, int senderId) {
@@ -108,9 +127,9 @@ public class Storage {
         }
     }
 
-    public void fillCurrRDChunks(){
+    public void fillCurrRDChunks() {
         for (int i = 0; i < this.storedChunks.size(); i++) {
-            String key = this.storedChunks.get(i).getFileID()+"_"+this.storedChunks.get(i).getNr();
+            String key = this.storedChunks.get(i).getFileID() + "_" + this.storedChunks.get(i).getNr();
             this.storedChunks.get(i).setCurrReplicationDegree(this.storedOccurrences.get(key));
         }
     }
