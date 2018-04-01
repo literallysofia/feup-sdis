@@ -21,7 +21,6 @@ public class Peer implements RMIRemote {
         MC = new ChannelControl();
         MDB = new ChannelBackup();
         MDR = new ChannelRestore();
-        storage = new Storage();
     }
 
     public static int getId() {
@@ -67,9 +66,13 @@ public class Peer implements RMIRemote {
             e.printStackTrace();
         }
 
+        deserializeStorage();
+
         exec.execute(MC);
         exec.execute(MDB);
         exec.execute(MDR);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> serializeStorage()));
     }
 
 
@@ -234,6 +237,51 @@ public class Peer implements RMIRemote {
             String key = storage.getStoredChunks().get(i).getFileID() + '_' + chunkNr;
             System.out.println("CHUNK ID: " + chunkNr);
             System.out.println("CHUNK PERCEIVED REPLICATION DEGREE: " + storage.getStoredOccurrences().get(key) + "\n");
+        }
+    }
+
+    public static void serializeStorage() {
+        try {
+            String filename = Peer.getId() + "/storage.ser";
+
+            File file = new File(filename);
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+
+            FileOutputStream fileOut = new FileOutputStream(filename);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(storage);
+            out.close();
+            fileOut.close();
+        } catch (IOException i) {
+            i.printStackTrace();
+        }
+    }
+
+    public static void deserializeStorage() {
+        try {
+            String filename = Peer.getId() + "/storage.ser";
+
+            File file = new File(filename);
+            if (!file.exists()) {
+                storage = new Storage();
+                return;
+            }
+
+            FileInputStream fileIn = new FileInputStream(filename);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            storage = (Storage) in.readObject();
+            in.close();
+            fileIn.close();
+        } catch (IOException i) {
+            i.printStackTrace();
+            return;
+        } catch (ClassNotFoundException c) {
+            System.out.println("Storage class not found");
+            c.printStackTrace();
+            return;
         }
     }
 
