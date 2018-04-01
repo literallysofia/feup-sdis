@@ -40,7 +40,7 @@ public class Storage implements java.io.Serializable{
         this.receivedChunks = new ArrayList<>();
         this.storedOccurrences = new ConcurrentHashMap<>();
         this.wantedChunks = new ConcurrentHashMap<>();
-        this.spaceAvailable = 1000000;
+        this.spaceAvailable = 1000000000;
     }
 
     public ArrayList<FileData> getFiles() {

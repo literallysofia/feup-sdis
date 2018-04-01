@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class GetChunkReceivedThread implements Runnable {
 
@@ -34,7 +36,8 @@ public class GetChunkReceivedThread implements Runnable {
 
                     SendMessageThread sendThread = new SendMessageThread(message, "MDR");
                     System.out.println("Sent CHUNK");
-                    Peer.getExec().execute(sendThread);
+                    Random random = new Random();
+                    Peer.getExec().schedule(sendThread, random.nextInt(401), TimeUnit.MILLISECONDS);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

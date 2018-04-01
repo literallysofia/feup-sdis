@@ -17,7 +17,7 @@ public class Peer implements RMIRemote {
     private static Storage storage;
 
     public Peer() {
-        exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(50);
+        exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(250);
         MC = new ChannelControl();
         MDB = new ChannelBackup();
         MDR = new ChannelRestore();
@@ -102,9 +102,10 @@ public class Peer implements RMIRemote {
 
                 SendMessageThread sendThread = new SendMessageThread(message, "MDB");
                 exec.execute(sendThread);
-
+                Thread.sleep(500);
                 Peer.getExec().schedule(new PutChunkManager(message, 1, file.getId(), chunk.getNr(), replicationDegree), 1, TimeUnit.SECONDS);
-            } catch (UnsupportedEncodingException e) {
+
+            } catch (UnsupportedEncodingException | InterruptedException e) {
                 e.printStackTrace();
             }
         }

@@ -42,6 +42,8 @@ public class ManageRestoreThread implements Runnable {
             for (String key : sortedChunkKeys) {
                 String chunkPath = Peer.getId() + "/" + key;
 
+                System.out.println("MERGE: " + key);
+
                 File chunkFile = new File(chunkPath);
 
                 if (!chunkFile.exists()) {
