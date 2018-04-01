@@ -1,5 +1,6 @@
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.regex.Pattern;
 
 public class App {
 
@@ -8,17 +9,19 @@ public class App {
 
     public static void main(String[] args) {
 
-        //String host = (args.length < 1) ? null : args[0];
         try {
+
 
             if (args.length > 4) {
                 System.out.println("ERROR: App format must be: App <peer_ap> <sub_protocol> <opnd_1> <opnd_2>");
                 return;
             }
 
-            String peerID = args[0];
+            String[] ipPeerID = args[0].split("/");
+            String host = ipPeerID[2];
+            String peerID = ipPeerID[3];
 
-            Registry registry = LocateRegistry.getRegistry(1099);
+            Registry registry = LocateRegistry.getRegistry(host);
             RMIRemote peer = (RMIRemote) registry.lookup(peerID);
 
             String filePath;
