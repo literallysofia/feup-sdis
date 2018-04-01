@@ -108,7 +108,7 @@ public class Peer implements RMIRemote {
     }
 
     public void restore(String filepath) {
-        String fileName = "";
+        String fileName = null;
 
         for (int i = 0; i < storage.getFiles().size(); i++) {
             if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) { //if file exists
@@ -124,15 +124,12 @@ public class Peer implements RMIRemote {
                         SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MC");
 
                         exec.execute(sendThread);
+
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                 }
-
-                while (storage.getWantedChunks().containsValue("false")) {
-                    //waits if any chunks has not been received
-                }
-                restoreFile(fileName);
+                Peer.getExec().schedule(new ManageRestoreThread(fileName), 10, TimeUnit.SECONDS);
             } else System.out.println("ERROR: File was never backed up.");
         }
     }
@@ -154,7 +151,7 @@ public class Peer implements RMIRemote {
                 }
 
                 for (int j = 0; j < this.storage.getFiles().get(i).getChunks().size(); j++) {
-                       this.storage.removeStoredOccurrencesEntry(this.storage.getFiles().get(i).getId(), this.storage.getFiles().get(i).getChunks().get(j).getNr());
+                    this.storage.removeStoredOccurrencesEntry(this.storage.getFiles().get(i).getId(), this.storage.getFiles().get(i).getChunks().get(j).getNr());
                 }
 
                 storage.getFiles().remove(i);
@@ -170,9 +167,9 @@ public class Peer implements RMIRemote {
 
         storage.setSpaceAvailable(newSpaceAvailable);
 
-        int spaceToFree=storage.getOccupiedSpace()-newSpaceAvailable;
+        int spaceToFree = storage.getOccupiedSpace() - newSpaceAvailable;
 
-        if(spaceToFree>0){
+        if (spaceToFree > 0) {
             storage.fillCurrRDChunks();
             storage.getStoredChunks().sort(Collections.reverseOrder());
 
@@ -237,43 +234,6 @@ public class Peer implements RMIRemote {
             String key = storage.getStoredChunks().get(i).getFileID() + '_' + chunkNr;
             System.out.println("CHUNK ID: " + chunkNr);
             System.out.println("CHUNK PERCEIVED REPLICATION DEGREE: " + storage.getStoredOccurrences().get(key) + "\n");
-        }
-    }
-
-    private void restoreFile(String fileName) {
-        String filePath = Peer.getId() + "/" + fileName;
-        File file = new File(filePath);
-        byte[] body = null;
-
-        try {
-            FileOutputStream fos = new FileOutputStream(file, true);
-
-            if (!file.exists()) {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            }
-
-            List<String> sortedChunkKeys = new ArrayList<>(storage.getWantedChunks().keySet());
-            Collections.sort(sortedChunkKeys);
-
-            for (String key : sortedChunkKeys) {
-                String chunkPath = Peer.getId() + "/" + key;
-
-                File chunkFile = new File(chunkPath);
-                body = new byte[(int) chunkFile.length()];
-                FileInputStream in = new FileInputStream(chunkFile);
-
-                in.read(body);
-                fos.write(body);
-
-                chunkFile.delete();
-            }
-
-            fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
