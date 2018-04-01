@@ -21,7 +21,6 @@ public class Peer implements RMIRemote {
         MC = new ChannelControl();
         MDB = new ChannelBackup();
         MDR = new ChannelRestore();
-        storage = new Storage();
     }
 
     public static int getId() {
@@ -67,9 +66,13 @@ public class Peer implements RMIRemote {
             e.printStackTrace();
         }
 
+        deserializeStorage();
+
         exec.execute(MC);
         exec.execute(MDB);
         exec.execute(MDR);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> serializeStorage()));
     }
 
 
@@ -154,7 +157,7 @@ public class Peer implements RMIRemote {
                 }
 
                 for (int j = 0; j < this.storage.getFiles().get(i).getChunks().size(); j++) {
-                       this.storage.removeStoredOccurrencesEntry(this.storage.getFiles().get(i).getId(), this.storage.getFiles().get(i).getChunks().get(j).getNr());
+                    this.storage.removeStoredOccurrencesEntry(this.storage.getFiles().get(i).getId(), this.storage.getFiles().get(i).getChunks().get(j).getNr());
                 }
 
                 storage.getFiles().remove(i);
@@ -170,9 +173,9 @@ public class Peer implements RMIRemote {
 
         storage.setSpaceAvailable(newSpaceAvailable);
 
-        int spaceToFree=storage.getOccupiedSpace()-newSpaceAvailable;
+        int spaceToFree = storage.getOccupiedSpace() - newSpaceAvailable;
 
-        if(spaceToFree>0){
+        if (spaceToFree > 0) {
             storage.fillCurrRDChunks();
             storage.getStoredChunks().sort(Collections.reverseOrder());
 
@@ -274,6 +277,52 @@ public class Peer implements RMIRemote {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+    }
+
+    public static void serializeStorage() {
+        try {
+            String filename = Peer.getId() + "/storage.ser";
+
+            File file = new File(filename);
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+
+            FileOutputStream fileOut = new FileOutputStream(filename);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(storage);
+            out.close();
+            fileOut.close();
+        } catch (IOException i) {
+            i.printStackTrace();
+        }
+    }
+
+    public static void deserializeStorage() {
+        try {
+            String filename = Peer.getId() + "/storage.ser";
+
+            File file = new File(filename);
+            if (!file.exists()) {
+                storage = new Storage();
+                return;
+            }
+
+            FileInputStream fileIn = new FileInputStream(filename);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            storage = (Storage) in.readObject();
+            in.close();
+            fileIn.close();
+        } catch (IOException i) {
+            i.printStackTrace();
+            return;
+        } catch (ClassNotFoundException c) {
+            System.out.println("Storage class not found");
+            c.printStackTrace();
+            return;
         }
     }
 

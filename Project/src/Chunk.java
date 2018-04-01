@@ -1,4 +1,4 @@
-public class Chunk implements Comparable {
+public class Chunk implements Comparable, java.io.Serializable {
     private int nr;
     private byte[] content;
     private String fileID;

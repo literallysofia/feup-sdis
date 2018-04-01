@@ -2,7 +2,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Storage {
+public class Storage implements java.io.Serializable{
 
     /*
      * Array that contains all files and data
@@ -175,4 +175,5 @@ public class Storage {
             }
         }
     }
+
 }

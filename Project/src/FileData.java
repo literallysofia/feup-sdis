@@ -6,7 +6,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class FileData {
+public class FileData implements java.io.Serializable{
 
     private String id;
     private File file;
