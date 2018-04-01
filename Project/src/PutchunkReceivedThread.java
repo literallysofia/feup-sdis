@@ -1,20 +1,15 @@
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 public class PutchunkReceivedThread implements Runnable {
 
-    private double version;
-    private int senderId;
     private String fileId;
     private int chunkNr;
     private int replicationDegree;
     private byte[] content;
 
-    public PutchunkReceivedThread(Double version, int senderId, String fileId, int chunkNr, int replicationDegree, byte[] content) {
-        this.version = version;
-        this.senderId = senderId;
+    public PutchunkReceivedThread(String fileId, int chunkNr, int replicationDegree, byte[] content) {
         this.fileId = fileId;
         this.chunkNr = chunkNr;
         this.replicationDegree = replicationDegree;

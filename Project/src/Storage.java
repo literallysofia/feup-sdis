@@ -1,5 +1,3 @@
-import javafx.util.Pair;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,9 +28,9 @@ public class Storage {
 
     /*
      * key = <fileID>_<ChunkNo>
-     * content = chunk's content (null if not received)
+     * hasReceived = if received (true) if not (false)
      */
-    private ConcurrentHashMap<String, byte[]> wantedChunks;
+    private ConcurrentHashMap<String, String> wantedChunks;
 
     private int spaceAvailable;
 
@@ -61,7 +59,7 @@ public class Storage {
         return this.storedOccurrences;
     }
 
-    public ConcurrentHashMap<String, byte[]> getWantedChunks() {
+    public ConcurrentHashMap<String, String> getWantedChunks() {
         return this.wantedChunks;
     }
 
@@ -92,8 +90,7 @@ public class Storage {
 
         if (!Peer.getStorage().getStoredOccurrences().containsKey(key)) {
             Peer.getStorage().getStoredOccurrences().put(key, 1);
-        }
-        else{
+        } else {
             int total = this.storedOccurrences.get(key) + 1;
             this.storedOccurrences.replace(key, total);
         }
@@ -113,13 +110,12 @@ public class Storage {
 
     public void addWantedChunk(String fileID, int chunkNr) {
         String key = fileID + '_' + chunkNr;
-        byte[] bytes = new byte[1];;
-        this.wantedChunks.put(key, bytes);
+        this.wantedChunks.put(key, "false");
     }
 
-    public void addWantedChunkContent(String fileID, int chunkNr, byte[] content) {
+    public void setWantedChunkReceived(String fileID, int chunkNr) {
         String key = fileID + '_' + chunkNr;
-        this.wantedChunks.replace(key, content);
+        this.wantedChunks.replace(key, "true");
     }
 
     public void deleteStoredChunks(String fileID, int senderId) {

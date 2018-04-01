@@ -67,7 +67,7 @@ public class ManageReceivedMessageThread implements Runnable {
         if (Peer.getId() != senderId) {
             Random random = new Random();
             System.out.println("Received PUTCHUNK Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr + " replicationDegree: " + replicationDegree);
-            Peer.getExec().schedule(new PutchunkReceivedThread(version, senderId, fileId, chunkNr, replicationDegree, body), random.nextInt(401), TimeUnit.MILLISECONDS);
+            Peer.getExec().schedule(new PutchunkReceivedThread(fileId, chunkNr, replicationDegree, body), random.nextInt(401), TimeUnit.MILLISECONDS);
         }
     }
 
@@ -152,8 +152,8 @@ public class ManageReceivedMessageThread implements Runnable {
             Peer.getStorage().getReceivedChunks().add(chunk);
 
             if (!Peer.getStorage().getWantedChunks().isEmpty()) {
-                Peer.getStorage().addWantedChunkContent(fileId, chunkNr, body);
-                System.out.println("ADDED WANTED!");
+                Peer.getStorage().setWantedChunkReceived(fileId, chunkNr);
+                storeRestoredChunks(fileId, chunkNr, body);
             }
             System.out.println("Received CHUNK Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
         }
@@ -197,6 +197,26 @@ public class ManageReceivedMessageThread implements Runnable {
             System.out.println("Received REMOVED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
             Random random = new Random();
             Peer.getExec().schedule(new RemovedReceivedMessageThread(version, senderId, fileId, chunkNr), random.nextInt(401), TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void storeRestoredChunks(String fileId, int chunkNr, byte[] body) {
+
+        try {
+            String filename = Peer.getId() + "/" + fileId + "_" + chunkNr;
+
+            File file = new File(filename);
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+
+            try (FileOutputStream fos = new FileOutputStream(filename)) {
+                fos.write(body);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

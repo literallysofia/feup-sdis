@@ -1,5 +1,4 @@
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
@@ -7,7 +6,6 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class Peer implements RMIRemote {
 
@@ -131,15 +129,10 @@ public class Peer implements RMIRemote {
                     }
                 }
 
-                while (!isComplete()) {
+                while (storage.getWantedChunks().containsValue("false")) {
+                    //waits if any chunks has not been received
                 }
-
-                try {
-                    restoreFile(fileName);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                System.out.println("CHUNKS TODOS!!!");
+                restoreFile(fileName);
             } else System.out.println("ERROR: File was never backed up.");
         }
     }
@@ -247,53 +240,41 @@ public class Peer implements RMIRemote {
         }
     }
 
-    private void restoreFile(String fileName) throws IOException {
-        List<byte[]> bytesList = new ArrayList<>();
+    private void restoreFile(String fileName) {
+        String filePath = Peer.getId() + "/" + fileName;
+        File file = new File(filePath);
+        byte[] body = null;
 
-        List<String> sortedChunkKeys = new ArrayList<>(storage.getWantedChunks().keySet());
-        Collections.sort(sortedChunkKeys);
-
-        for (String key : sortedChunkKeys) {
-            byte[] bytes = storage.getWantedChunks().get(key);
-            bytesList.add(bytes);
-            /*System.out.println('\n' + key);
-
-            for (int i = 0; i < storage.getFiles().size(); i++) {
-                if (storage.getFiles().get(i).getFile().getPath().equals("/Users/sofiasilva/Documents/GitHub/feup-sdis/Project/src/lil.txt")) { //if file exists
-                    for (int j = 0; j < storage.getFiles().get(i).getChunks().size(); j++) { //if file has backedup chunks
-                        System.out.println('\n' + storage.getFiles().get(i).getChunks().get(j).getContent().toString() + '\n');
-                    }
-                }
-            }
-            System.out.println('\n' + bytes.toString());*/
-        }
-
-        String filename = Peer.getId() + "/" + fileName;
-
-        File file = new File(filename);
-        if (!file.exists()) {
-            file.getParentFile().mkdirs();
-            file.createNewFile();
-        }
-
-        FileOutputStream fos = new FileOutputStream(filename);
         try {
-            Iterator<byte[]> it = bytesList.iterator();
-            while (it.hasNext())
-                fos.write(it.next());
-        } finally {
+            FileOutputStream fos = new FileOutputStream(file, true);
+
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+
+            List<String> sortedChunkKeys = new ArrayList<>(storage.getWantedChunks().keySet());
+            Collections.sort(sortedChunkKeys);
+
+            for (String key : sortedChunkKeys) {
+                String chunkPath = Peer.getId() + "/" + key;
+
+                File chunkFile = new File(chunkPath);
+                body = new byte[(int) chunkFile.length()];
+                FileInputStream in = new FileInputStream(chunkFile);
+
+                in.read(body);
+                fos.write(body);
+
+                chunkFile.delete();
+            }
+
             fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
     }
-
-    private boolean isComplete() {
-        for (String key : storage.getWantedChunks().keySet()) {
-            if (storage.getWantedChunks().get(key).length == 1)
-                return false;
-        }
-        return true;
-    }
-
 
 }

@@ -39,7 +39,7 @@ public class ChannelControl implements Runnable {
         // Create a buffer of bytes, which will be used to store
         // the incoming bytes containing the information from the server.
         // Since the message is small here, 256 bytes should be enough.
-        byte[] buf = new byte[256];
+        byte[] buf = new byte[65000];
 
         // Create a new Multicast socket (that will allow other sockets/programs
         // to join it as well.

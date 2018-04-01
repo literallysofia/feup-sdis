@@ -1,8 +1,6 @@
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class ChannelRestore implements Runnable {
     private final String INET_ADDR = "224.0.0.17";
@@ -42,7 +40,7 @@ public class ChannelRestore implements Runnable {
         // Create a buffer of bytes, which will be used to store
         // the incoming bytes containing the information from the server.
         // Since the message is small here, 256 bytes should be enough.
-        byte[] buf = new byte[256];
+        byte[] buf = new byte[65000];
 
         // Create a new Multicast socket (that will allow other sockets/programs
         // to join it as well.
