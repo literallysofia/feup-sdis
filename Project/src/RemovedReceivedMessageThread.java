@@ -17,7 +17,6 @@ public class RemovedReceivedMessageThread implements Runnable {
 
     @Override
     public void run() {
-        //TODO: SE AINDA NAO RECEBEU NENHUM PUTCHUNK DESTE FILE
 
         boolean hasChunk = false;
         int desiredReplicationDegree = 0;
@@ -31,6 +30,7 @@ public class RemovedReceivedMessageThread implements Runnable {
 
         if (hasChunk) {
             String key = fileId + '_' + chunkNr;
+
                 if (Peer.getStorage().getStoredOccurrences().get(key) < desiredReplicationDegree) {
 
                     int sizeOfChunks = 64000;
@@ -52,7 +52,7 @@ public class RemovedReceivedMessageThread implements Runnable {
                         e.printStackTrace();
                     }
 
-                    String header = "PUTCHUNK " + "1.0" + " " + senderId + " " + fileId + " " + chunkNr + " " + desiredReplicationDegree + "\r\n\r\n";
+                    String header = "PUTCHUNK " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr + " " + desiredReplicationDegree + "\r\n\r\n";
                     System.out.println("Sent PUTCHUNK " + chunkNr + " after REMOVED chunk ");
 
                     if (!Peer.getStorage().getStoredOccurrences().containsKey(key)) {

@@ -149,57 +149,71 @@ public class Peer implements RMIRemote {
         for (int i = 0; i < storage.getFiles().size(); i++) {
             if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) {
 
-                for (int j = 0; j < 3; j++) {
+                for (int j = 0; j < 5; j++) {
                     String header = "DELETE " + "1.0" + " " + this.id + " " + storage.getFiles().get(i).getId() + "\r\n\r\n";
-
+                    System.out.println("Send DELETE " + "1.0" + " " + this.id + " " + storage.getFiles().get(i).getId());
                     try {
-                        SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MDB");
-
+                        SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MC");
                         exec.execute(sendThread);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                 }
 
-            } else return;
-        }
-    }
+                for (int j = 0; j < this.storage.getFiles().get(i).getChunks().size(); j++) {
+                       this.storage.removeStoredOccurrencesEntry(this.storage.getFiles().get(i).getId(), this.storage.getFiles().get(i).getChunks().get(j).getNr());
+                }
 
-    public void reclaim(int diskSpaceToReclaim) {
+                storage.getFiles().remove(i);
 
-        storage.fillCurrRDChunks();
-        storage.getStoredChunks().sort(Collections.reverseOrder());
-
-        ArrayList<Integer> indexsToDelete = new ArrayList<>();
-
-        int total = 0;
-        for (int i = 0; i < storage.getStoredChunks().size(); i++) {
-            if (total < diskSpaceToReclaim) {
-                indexsToDelete.add(i);
-                total = total + storage.getStoredChunks().get(i).getSize();
-            } else {
                 break;
             }
         }
 
-        for (int j = 0; j < indexsToDelete.size(); j++) {
-            Chunk chunk = storage.getStoredChunks().get(indexsToDelete.get(j));
+        return;
+    }
 
-            String header = "REMOVED " + "1.0" + " " + id + " " + chunk.getFileID() + " " + chunk.getNr() + "\r\n\r\n";
-            System.out.println("Sent REMOVED " + chunk.getFileID() + " " + chunk.getNr() + " size: " + chunk.getSize() + " RD: " + chunk.getCurrReplicationDegree());
-            try {
-                byte[] asciiHeader = header.getBytes("US-ASCII");
-                SendMessageThread sendThread = new SendMessageThread(asciiHeader, "MC");
-                exec.execute(sendThread);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+    public void reclaim(int newSpaceAvailable) {
+
+        storage.setSpaceAvailable(newSpaceAvailable);
+
+        int spaceToFree=storage.getOccupiedSpace()-newSpaceAvailable;
+
+        if(spaceToFree>0){
+            storage.fillCurrRDChunks();
+            storage.getStoredChunks().sort(Collections.reverseOrder());
+
+            ArrayList<Integer> indexsToDelete = new ArrayList<>();
+
+            int toDelete = 0;
+            for (int i = 0; i < storage.getStoredChunks().size(); i++) {
+                if (toDelete < spaceToFree) {
+                    toDelete = toDelete + storage.getStoredChunks().get(i).getSize();
+                    indexsToDelete.add(i);
+                } else {
+                    break;
+                }
             }
-            storage.getStoredChunks().remove(indexsToDelete.get(j));
 
-            String filename = Peer.getId() + "/" + chunk.getFileID() + "_" + chunk.getNr();
-            File file = new File(filename);
-            Peer.getStorage().decStoredChunk(chunk.getFileID(), chunk.getNr());
-            file.delete();
+            for (int j = 0; j < indexsToDelete.size(); j++) {
+                Chunk chunk = storage.getStoredChunks().get(indexsToDelete.get(j));
+
+                String header = "REMOVED " + "1.0" + " " + id + " " + chunk.getFileID() + " " + chunk.getNr() + "\r\n\r\n";
+                System.out.println("Sent REMOVED " + chunk.getFileID() + " " + chunk.getNr() + " size: " + chunk.getSize() + " RD: " + chunk.getCurrReplicationDegree());
+                try {
+                    byte[] asciiHeader = header.getBytes("US-ASCII");
+                    SendMessageThread sendThread = new SendMessageThread(asciiHeader, "MC");
+                    exec.execute(sendThread);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                String filename = Peer.getId() + "/" + chunk.getFileID() + "_" + chunk.getNr();
+                File file = new File(filename);
+                file.delete();
+                Peer.getStorage().decStoredChunk(chunk.getFileID(), chunk.getNr());
+                storage.removeStoredChunk(chunk);
+
+            }
         }
 
     }

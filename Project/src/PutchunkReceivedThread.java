@@ -27,33 +27,37 @@ public class PutchunkReceivedThread implements Runnable {
 
         if (Peer.getStorage().getStoredOccurrences().get(key) < replicationDegree) {
 
-            Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree, content.length);
+            if(Peer.getStorage().getSpaceAvailable()-content.length >= 0){
+                Chunk chunk = new Chunk(chunkNr, fileId, replicationDegree, content.length);
 
-            if (!Peer.getStorage().addStoredChunk(chunk)){
-                return;
-            }
-
-
-            try {
-                String filename = Peer.getId() + "/" + fileId + "_" + chunkNr;
-
-                File file = new File(filename);
-                if (!file.exists()) {
-                    file.getParentFile().mkdirs();
-                    file.createNewFile();
+                if (!Peer.getStorage().addStoredChunk(chunk)){
+                    return;
                 }
 
-                try (FileOutputStream fos = new FileOutputStream(filename)) {
-                    fos.write(content);
-                }
+                //Peer.getStorage().addPutchunkFromInterval(fileId, chunkNr, senderId);
+                Peer.getStorage().decSpaceAvailable(content.length);
 
-            } catch (IOException e) {
-                e.printStackTrace();
+                try {
+                    String filename = Peer.getId() + "/" + fileId + "_" + chunkNr;
+
+                    File file = new File(filename);
+                    if (!file.exists()) {
+                        file.getParentFile().mkdirs();
+                        file.createNewFile();
+                    }
+
+                    try (FileOutputStream fos = new FileOutputStream(filename)) {
+                        fos.write(content);
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Peer.getStorage().incStoredChunk(fileId, chunkNr);
+                String header = "STORED " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr + "\r\n\r\n";
+                System.out.println("Sent " + "STORED " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr);
+                Peer.getMC().sendMessage(header.getBytes());
             }
-            Peer.getStorage().incStoredChunk(fileId, chunkNr);
-            String header = "STORED " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr + "\r\n\r\n";
-            System.out.println("Sent " + header);
-            Peer.getMC().sendMessage(header.getBytes());
         }
     }
 }

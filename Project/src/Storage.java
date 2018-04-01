@@ -34,6 +34,7 @@ public class Storage {
      */
     private ConcurrentHashMap<String, byte[]> wantedChunks;
 
+    private int spaceAvailable;
 
     public Storage() {
         this.files = new ArrayList<>();
@@ -41,6 +42,7 @@ public class Storage {
         this.receivedChunks = new ArrayList<>();
         this.storedOccurrences = new ConcurrentHashMap<>();
         this.wantedChunks = new ConcurrentHashMap<>();
+        this.spaceAvailable = 1000000;
     }
 
     public ArrayList<FileData> getFiles() {
@@ -94,16 +96,19 @@ public class Storage {
         else{
             int total = this.storedOccurrences.get(key) + 1;
             this.storedOccurrences.replace(key, total);
-            System.out.println("INC " + chunkNr);
         }
 
     }
 
     public synchronized void decStoredChunk(String fileID, int chunkNr) {
-        System.out.println("DEC " + chunkNr);
         String key = fileID + '_' + chunkNr;
         int total = this.storedOccurrences.get(key) - 1;
         this.storedOccurrences.replace(key, total);
+    }
+
+    public synchronized void removeStoredOccurrencesEntry(String fileID, int chunkNr){
+        String key = fileID + '_' + chunkNr;
+        this.storedOccurrences.remove(key);
     }
 
     public void addWantedChunk(String fileID, int chunkNr) {
@@ -123,6 +128,8 @@ public class Storage {
                 String filename = Peer.getId() + "/" + fileID + "_" + this.storedChunks.get(i).getNr();
                 File file = new File(filename);
                 file.delete();
+                removeStoredOccurrencesEntry(fileID, this.storedChunks.get(i).getNr());
+                incSpaceAvailable(fileID, this.storedChunks.get(i).getNr());
                 this.storedChunks.remove(i);
             }
         }
@@ -135,4 +142,41 @@ public class Storage {
         }
     }
 
+    public synchronized int getSpaceAvailable() {
+        return this.spaceAvailable;
+    }
+
+    public synchronized void setSpaceAvailable(int spaceAvailable) {
+        this.spaceAvailable = spaceAvailable;
+    }
+
+    public synchronized void decSpaceAvailable(int chunkSize){
+        spaceAvailable = spaceAvailable - chunkSize;
+    }
+
+    public synchronized void incSpaceAvailable(String fileId, int chunkNr){
+
+        for (int i = 0; i < this.storedChunks.size(); i++) {
+            if (this.storedChunks.get(i).getFileID().equals(fileId) && this.storedChunks.get(i).getNr() == chunkNr)
+                this.spaceAvailable = this.spaceAvailable + this.storedChunks.get(i).getSize();
+        }
+
+    }
+
+    public synchronized int getOccupiedSpace(){
+        int occupiedSpace = 0;
+        for (int i = 0; i < this.storedChunks.size(); i++) {
+           occupiedSpace = occupiedSpace + this.storedChunks.get(i).getSize();
+        }
+        return occupiedSpace;
+    }
+
+    public synchronized void removeStoredChunk(Chunk chunk){
+        for (int i = 0; i < this.storedChunks.size(); i++) {
+            if (this.storedChunks.get(i).getFileID().equals(chunk.getFileID()) && this.storedChunks.get(i).getNr() == chunk.getNr()){
+                this.storedChunks.remove(i);
+                break;
+            }
+        }
+    }
 }

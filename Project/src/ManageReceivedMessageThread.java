@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class ManageReceivedMessageThread implements Runnable {
@@ -103,10 +104,8 @@ public class ManageReceivedMessageThread implements Runnable {
         Double version = Double.parseDouble(headerArray[1].trim());
         int senderId = Integer.parseInt(headerArray[2].trim());
         String fileId = headerArray[3].trim();
-        int chunkNr =  Integer.parseInt(headerArray[4].trim());
 
         if (Peer.getId() != senderId) {
-            Peer.getStorage().decStoredChunk(fileId, chunkNr);
             Peer.getStorage().deleteStoredChunks(fileId, senderId);
             System.out.println("Received DELETE Version: " + version + " SenderId: " + senderId + " fileId: " + fileId);
         }
