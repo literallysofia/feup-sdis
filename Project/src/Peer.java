@@ -117,8 +117,8 @@ public class Peer implements RMIRemote {
         String fileName = null;
 
         for (int i = 0; i < storage.getFiles().size(); i++) {
-            if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) { //if file exists
-                for (int j = 0; j < storage.getFiles().get(i).getChunks().size(); j++) { //if file has backedup chunks
+            if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) {
+                for (int j = 0; j < storage.getFiles().get(i).getChunks().size(); j++) {
 
                     String header = "GETCHUNK " + version + " " + id + " " + storage.getFiles().get(i).getId() + " " + storage.getFiles().get(i).getChunks().get(j).getNr() + "\r\n\r\n";
                     System.out.println("Sent GETCHUNK");
