@@ -20,10 +20,10 @@ public class ManagePutChunkThread implements Runnable {
 
         int occurrences = Peer.getStorage().getStoredOccurrences().get(this.key);
 
-        if (occurrences < replicationDegree) {
+        if (occurrences < replicationDegree) { //if the replication degree isn't the desired one
 
             Peer.getMDB().sendMessage(message);
-            System.out.println("Sent PUTCHUNK");
+            System.out.println("Sent PUTCHUNK try: " + counter);
             this.time = 2 * this.time;
             this.counter++;
 

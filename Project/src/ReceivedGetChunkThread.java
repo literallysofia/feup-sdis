@@ -35,7 +35,7 @@ public class ReceivedGetChunkThread implements Runnable {
                     System.arraycopy(body, 0, message, asciiHeader.length, body.length);
 
                     SendMessageThread sendThread = new SendMessageThread(message, "MDR");
-                    System.out.println("Sent CHUNK");
+                    System.out.println("Sent" + "CHUNK " + "1.0" + " " + Peer.getId() + " " + this.fileId + " " + this.chunkNr);
                     Random random = new Random();
                     Peer.getExec().schedule(sendThread, random.nextInt(401), TimeUnit.MILLISECONDS);
                 } catch (IOException e) {

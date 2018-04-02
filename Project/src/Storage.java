@@ -118,6 +118,7 @@ public class Storage implements java.io.Serializable{
         this.storedOccurrences.remove(key);
     }
 
+    //for every stored chunk, gets his currents replication degree from the stored occurences table
     public void fillCurrRDChunks() {
         for (Chunk storedChunk : this.storedChunks) {
             String key = storedChunk.getFileID() + "_" + storedChunk.getNr();
@@ -141,9 +142,7 @@ public class Storage implements java.io.Serializable{
     }
 
     public synchronized void setSpaceAvailable(int spaceAvailable) {
-        System.out.println("OLD SPACE AVAILABLE: " + this.spaceAvailable);
         this.spaceAvailable = spaceAvailable;
-        System.out.println("NEW SPACE AVAILABLE: " + this.spaceAvailable);
     }
 
     public synchronized void decSpaceAvailable(int chunkSize){
