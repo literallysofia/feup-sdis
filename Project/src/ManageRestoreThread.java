@@ -1,7 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ManageRestoreThread implements Runnable {
 
@@ -20,7 +18,7 @@ public class ManageRestoreThread implements Runnable {
             else System.out.println("ERROR: File not restored.\n");
         } else System.out.println("ERROR: File not restored, chunks missing.\n");
 
-
+        Peer.getStorage().getWantedChunks().clear();
     }
 
     private boolean restoreFile() {
@@ -37,7 +35,14 @@ public class ManageRestoreThread implements Runnable {
             }
 
             List<String> sortedChunkKeys = new ArrayList<>(Peer.getStorage().getWantedChunks().keySet());
-            Collections.sort(sortedChunkKeys);
+            /*Collections.sort(sortedChunkKeys);
+
+            List<String> test = new ArrayList<>(Peer.getStorage().getWantedChunks().keySet());*/
+            Collections.sort(sortedChunkKeys, (o1, o2) -> {
+                int chunkNr1 = Integer.valueOf(o1.split("_")[1]);
+                int chunkNr2 = Integer.valueOf(o2.split("_")[1]);
+                return Integer.compare(chunkNr1, chunkNr2);
+            });
 
             for (String key : sortedChunkKeys) {
                 String chunkPath = Peer.getId() + "/" + key;

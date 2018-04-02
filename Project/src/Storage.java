@@ -143,7 +143,9 @@ public class Storage implements java.io.Serializable{
     }
 
     public synchronized void setSpaceAvailable(int spaceAvailable) {
+        System.out.println("OLD SPACE AVAILABLE: " + this.spaceAvailable);
         this.spaceAvailable = spaceAvailable;
+        System.out.println("NEW SPACE AVAILABLE: " + this.spaceAvailable);
     }
 
     public synchronized void decSpaceAvailable(int chunkSize){

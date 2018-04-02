@@ -29,7 +29,6 @@ public class PutchunkReceivedThread implements Runnable {
                     return;
                 }
 
-                //Peer.getStorage().addPutchunkFromInterval(fileId, chunkNr, senderId);
                 Peer.getStorage().decSpaceAvailable(content.length);
 
                 try {
@@ -52,6 +51,9 @@ public class PutchunkReceivedThread implements Runnable {
                 String header = "STORED " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr + "\r\n\r\n";
                 System.out.println("Sent " + "STORED " + "1.0" + " " + Peer.getId() + " " + fileId + " " + chunkNr);
                 Peer.getMC().sendMessage(header.getBytes());
+            }
+            else{
+                System.out.println("THIS PEER DOESN'T HAVE SPACE TO STORE CHUNK " + fileId + "_" + chunkNr);
             }
         }
     }
