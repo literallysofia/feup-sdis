@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class ManageReceivedMessageThread implements Runnable {
@@ -196,7 +195,7 @@ public class ManageReceivedMessageThread implements Runnable {
             Peer.getStorage().decStoredChunk(fileId, chunkNr);
             System.out.println("Received REMOVED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
             Random random = new Random();
-            Peer.getExec().schedule(new RemovedReceivedMessageThread(version, senderId, fileId, chunkNr), random.nextInt(401), TimeUnit.MILLISECONDS);
+            Peer.getExec().schedule(new RemovedReceivedMessageThread(fileId, chunkNr), random.nextInt(401), TimeUnit.MILLISECONDS);
         }
     }
 

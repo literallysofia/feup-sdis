@@ -24,7 +24,7 @@ public class ManageRestoreThread implements Runnable {
     private boolean restoreFile() {
         String filePath = Peer.getId() + "/" + this.fileName;
         File file = new File(filePath);
-        byte[] body = null;
+        byte[] body;
 
         try {
             FileOutputStream fos = new FileOutputStream(file, true);
@@ -36,7 +36,7 @@ public class ManageRestoreThread implements Runnable {
 
             List<String> sortedChunkKeys = new ArrayList<>(Peer.getStorage().getWantedChunks().keySet());
 
-            Collections.sort(sortedChunkKeys, (o1, o2) -> {
+            sortedChunkKeys.sort((o1, o2) -> {
                 int chunkNr1 = Integer.valueOf(o1.split("_")[1]);
                 int chunkNr2 = Integer.valueOf(o2.split("_")[1]);
                 return Integer.compare(chunkNr1, chunkNr2);
@@ -64,8 +64,6 @@ public class ManageRestoreThread implements Runnable {
 
             fos.close();
             return true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

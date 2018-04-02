@@ -16,7 +16,7 @@ public class Peer implements RMIRemote {
     private static ScheduledThreadPoolExecutor exec;
     private static Storage storage;
 
-    public Peer() {
+    private Peer() {
         exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(250);
         MC = new ChannelControl();
         MDB = new ChannelBackup();
@@ -53,7 +53,7 @@ public class Peer implements RMIRemote {
 
         try {
             Peer obj = new Peer();
-            obj.id = Integer.parseInt(args[0]);
+            id = Integer.parseInt(args[0]);
             RMIRemote stub = (RMIRemote) UnicastRemoteObject.exportObject(obj, 0);
 
             // Bind the remote object's stub in the registry
@@ -72,7 +72,7 @@ public class Peer implements RMIRemote {
         exec.execute(MDB);
         exec.execute(MDR);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> serializeStorage()));
+        Runtime.getRuntime().addShutdownHook(new Thread(Peer::serializeStorage));
     }
 
 
@@ -85,7 +85,7 @@ public class Peer implements RMIRemote {
             Chunk chunk = file.getChunks().get(i);
             chunk.setDesiredReplicationDegree(replicationDegree);
 
-            String header = "PUTCHUNK " + "1.0" + " " + this.id + " " + file.getId() + " " + chunk.getNr() + " " + chunk.getDesiredReplicationDegree() + "\r\n\r\n";
+            String header = "PUTCHUNK " + "1.0" + " " + id + " " + file.getId() + " " + chunk.getNr() + " " + chunk.getDesiredReplicationDegree() + "\r\n\r\n";
             System.out.println("Sent PUTCHUNK chunk size: " + chunk.getSize());
 
             String key = file.getId() + "_" + chunk.getNr();
@@ -118,7 +118,7 @@ public class Peer implements RMIRemote {
             if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) { //if file exists
                 for (int j = 0; j < storage.getFiles().get(i).getChunks().size(); j++) { //if file has backedup chunks
 
-                    String header = "GETCHUNK " + "1.0" + " " + this.id + " " + storage.getFiles().get(i).getId() + " " + storage.getFiles().get(i).getChunks().get(j).getNr() + "\r\n\r\n";
+                    String header = "GETCHUNK " + "1.0" + " " + id + " " + storage.getFiles().get(i).getId() + " " + storage.getFiles().get(i).getChunks().get(j).getNr() + "\r\n\r\n";
                     System.out.println("Sent GETCHUNK");
 
                     storage.addWantedChunk(storage.getFiles().get(i).getId(), storage.getFiles().get(i).getChunks().get(j).getNr());
@@ -144,8 +144,8 @@ public class Peer implements RMIRemote {
             if (storage.getFiles().get(i).getFile().getPath().equals(filepath)) {
 
                 for (int j = 0; j < 5; j++) {
-                    String header = "DELETE " + "1.0" + " " + this.id + " " + storage.getFiles().get(i).getId() + "\r\n\r\n";
-                    System.out.println("Send DELETE " + "1.0" + " " + this.id + " " + storage.getFiles().get(i).getId());
+                    String header = "DELETE " + "1.0" + " " + id + " " + storage.getFiles().get(i).getId() + "\r\n\r\n";
+                    System.out.println("Send DELETE " + "1.0" + " " + id + " " + storage.getFiles().get(i).getId());
                     try {
                         SendMessageThread sendThread = new SendMessageThread(header.getBytes("US-ASCII"), "MC");
                         exec.execute(sendThread);
@@ -154,8 +154,8 @@ public class Peer implements RMIRemote {
                     }
                 }
 
-                for (int j = 0; j < this.storage.getFiles().get(i).getChunks().size(); j++) {
-                    this.storage.removeStoredOccurrencesEntry(this.storage.getFiles().get(i).getId(), this.storage.getFiles().get(i).getChunks().get(j).getNr());
+                for (int j = 0; j < storage.getFiles().get(i).getChunks().size(); j++) {
+                    storage.removeStoredOccurrencesEntry(storage.getFiles().get(i).getId(), storage.getFiles().get(i).getChunks().get(j).getNr());
                 }
 
                 storage.getFiles().remove(i);
@@ -164,7 +164,6 @@ public class Peer implements RMIRemote {
             }
         }
 
-        return;
     }
 
     public void reclaim(int newSpaceAvailable) {
@@ -202,7 +201,7 @@ public class Peer implements RMIRemote {
                     break;
                 }
             }
-            
+
         }
 
     }
@@ -236,7 +235,7 @@ public class Peer implements RMIRemote {
         }
     }
 
-    public static void serializeStorage() {
+    private static void serializeStorage() {
         try {
             String filename = Peer.getId() + "/storage.ser";
 
@@ -256,7 +255,7 @@ public class Peer implements RMIRemote {
         }
     }
 
-    public static void deserializeStorage() {
+    private static void deserializeStorage() {
         try {
             String filename = Peer.getId() + "/storage.ser";
 
@@ -273,11 +272,9 @@ public class Peer implements RMIRemote {
             fileIn.close();
         } catch (IOException i) {
             i.printStackTrace();
-            return;
         } catch (ClassNotFoundException c) {
             System.out.println("Storage class not found");
             c.printStackTrace();
-            return;
         }
     }
 

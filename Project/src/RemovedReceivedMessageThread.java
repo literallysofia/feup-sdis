@@ -4,13 +4,10 @@ import java.util.concurrent.TimeUnit;
 
 public class RemovedReceivedMessageThread implements Runnable {
 
-    private int senderId;
     private String fileId;
     private int chunkNr;
 
-    public RemovedReceivedMessageThread(Double version, int senderId, String fileId, int chunkNr) {
-        Double version1 = version;
-        this.senderId = senderId;
+    public RemovedReceivedMessageThread(String fileId, int chunkNr) {
         this.fileId = fileId;
         this.chunkNr = chunkNr;
     }

@@ -47,9 +47,7 @@ public class GetChunkReceivedThread implements Runnable {
     }
 
     private boolean isSameChunk(String fileId, int chunkNr) {
-        if (fileId.equals(this.fileId) && chunkNr == this.chunkNr)
-            return true;
-        else return false;
+        return fileId.equals(this.fileId) && chunkNr == this.chunkNr;
     }
 
     private boolean isAbortSend() {

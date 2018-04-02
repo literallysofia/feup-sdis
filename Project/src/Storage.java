@@ -70,8 +70,8 @@ public class Storage implements java.io.Serializable{
 
     public synchronized boolean addStoredChunk(Chunk chunk) {
 
-        for (int i = 0; i < this.storedChunks.size(); i++) {
-            if (this.storedChunks.get(i).getFileID().equals(chunk.getFileID()) && this.storedChunks.get(i).getNr() == chunk.getNr())
+        for (Chunk storedChunk : this.storedChunks) {
+            if (storedChunk.getFileID().equals(chunk.getFileID()) && storedChunk.getNr() == chunk.getNr())
                 return false;
         }
         this.storedChunks.add(chunk);
@@ -134,9 +134,9 @@ public class Storage implements java.io.Serializable{
     }
 
     public void fillCurrRDChunks() {
-        for (int i = 0; i < this.storedChunks.size(); i++) {
-            String key = this.storedChunks.get(i).getFileID() + "_" + this.storedChunks.get(i).getNr();
-            this.storedChunks.get(i).setCurrReplicationDegree(this.storedOccurrences.get(key));
+        for (Chunk storedChunk : this.storedChunks) {
+            String key = storedChunk.getFileID() + "_" + storedChunk.getNr();
+            storedChunk.setCurrReplicationDegree(this.storedOccurrences.get(key));
         }
     }
 
@@ -156,17 +156,17 @@ public class Storage implements java.io.Serializable{
 
     public synchronized void incSpaceAvailable(String fileId, int chunkNr){
 
-        for (int i = 0; i < this.storedChunks.size(); i++) {
-            if (this.storedChunks.get(i).getFileID().equals(fileId) && this.storedChunks.get(i).getNr() == chunkNr)
-                this.spaceAvailable = this.spaceAvailable + this.storedChunks.get(i).getSize();
+        for (Chunk storedChunk : this.storedChunks) {
+            if (storedChunk.getFileID().equals(fileId) && storedChunk.getNr() == chunkNr)
+                this.spaceAvailable = this.spaceAvailable + storedChunk.getSize();
         }
 
     }
 
     public synchronized int getOccupiedSpace(){
         int occupiedSpace = 0;
-        for (int i = 0; i < this.storedChunks.size(); i++) {
-           occupiedSpace = occupiedSpace + this.storedChunks.get(i).getSize();
+        for (Chunk storedChunk : this.storedChunks) {
+            occupiedSpace = occupiedSpace + storedChunk.getSize();
         }
         return occupiedSpace;
     }
