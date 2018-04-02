@@ -2,12 +2,13 @@ import java.io.IOException;
 import java.net.*;
 import java.util.Arrays;
 
-public class ChannelRestore implements Runnable {
-    private final String INET_ADDR = "224.0.0.17";
-    private int PORT = 8003;
+public class ChannelBackup implements Runnable {
+    private final String INET_ADDR = "224.0.0.16";
+    private int PORT = 8002;
     private InetAddress address;
 
-    public ChannelRestore() {
+
+    public ChannelBackup() {
         //Get the address that we are going to connect to.
         try {
             address = InetAddress.getByName(INET_ADDR);
@@ -28,8 +29,6 @@ public class ChannelRestore implements Runnable {
             DatagramPacket msgPacket = new DatagramPacket(msg, msg.length, address, PORT);
             senderSocket.send(msgPacket);
 
-            //System.out.println("CHANNEL RESTORE Sent msg: " + msg);
-
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -48,7 +47,6 @@ public class ChannelRestore implements Runnable {
             //Joint the Multicast group.
 
             MulticastSocket receiverSocket = new MulticastSocket(PORT);
-
             receiverSocket.joinGroup(address);
 
             while (true) {
@@ -56,7 +54,7 @@ public class ChannelRestore implements Runnable {
                 receiverSocket.receive(msgPacket);
 
                 byte[] bufferCopy = Arrays.copyOf(buf, msgPacket.getLength());
-                Peer.getExec().execute(new ReceivedMessagesManagerThread(bufferCopy));
+                Peer.getExec().execute(new ManageReceivedMessageThread(bufferCopy));
             }
         } catch (IOException ex) {
             ex.printStackTrace();

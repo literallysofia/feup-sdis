@@ -105,7 +105,7 @@ public class Peer implements RMIRemote {
                 SendMessageThread sendThread = new SendMessageThread(message, "MDB");
                 exec.execute(sendThread);
                 Thread.sleep(500);
-                Peer.getExec().schedule(new ManagePutChunkThread(message, 1, file.getId(), chunk.getNr(), replicationDegree), 1, TimeUnit.SECONDS);
+                Peer.getExec().schedule(new PutChunkManager(message, 1, file.getId(), chunk.getNr(), replicationDegree), 1, TimeUnit.SECONDS);
 
             } catch (UnsupportedEncodingException | InterruptedException e) {
                 e.printStackTrace();
@@ -197,7 +197,7 @@ public class Peer implements RMIRemote {
                     String filename = Peer.getId() + "/" + chunk.getFileID() + "_" + chunk.getNr();
                     File file = new File(filename);
                     file.delete();
-                    Peer.getStorage().decStoredOccurrences(chunk.getFileID(), chunk.getNr());
+                    Peer.getStorage().decStoredChunk(chunk.getFileID(), chunk.getNr());
                     iter.remove();
                 } else {
                     break;

@@ -56,7 +56,7 @@ public class ChannelRestore implements Runnable {
                 receiverSocket.receive(msgPacket);
 
                 byte[] bufferCopy = Arrays.copyOf(buf, msgPacket.getLength());
-                Peer.getExec().execute(new ReceivedMessagesManagerThread(bufferCopy));
+                Peer.getExec().execute(new ManageReceivedMessageThread(bufferCopy));
             }
         } catch (IOException ex) {
             ex.printStackTrace();

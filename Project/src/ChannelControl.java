@@ -55,7 +55,7 @@ public class ChannelControl implements Runnable {
                 receiverSocket.receive(msgPacket);
 
                 byte[] bufferCopy = Arrays.copyOf(buf, msgPacket.getLength());
-                Peer.getExec().execute(new ManageReceivedMessageThread(bufferCopy));
+                Peer.getExec().execute(new ReceivedMessagesManagerThread(bufferCopy));
             }
         } catch (IOException ex) {
             ex.printStackTrace();
