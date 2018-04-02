@@ -1,5 +1,6 @@
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Storage implements java.io.Serializable{
@@ -118,15 +119,16 @@ public class Storage implements java.io.Serializable{
         this.wantedChunks.replace(key, "true");
     }
 
-    public void deleteStoredChunks(String fileID, int senderId) {
-        for (int i = 0; i < this.storedChunks.size(); i++) {
-            if (this.storedChunks.get(i).getFileID().equals(fileID)) {
-                String filename = Peer.getId() + "/" + fileID + "_" + this.storedChunks.get(i).getNr();
+    public void deleteStoredChunks(String fileID) {
+        for (Iterator<Chunk> iter = this.storedChunks.iterator(); iter.hasNext(); ) {
+            Chunk chunk = iter.next();
+            if (chunk.getFileID().equals(fileID)) {
+                String filename = Peer.getId() + "/" + fileID + "_" + chunk.getNr();
                 File file = new File(filename);
                 file.delete();
-                removeStoredOccurrencesEntry(fileID, this.storedChunks.get(i).getNr());
-                incSpaceAvailable(fileID, this.storedChunks.get(i).getNr());
-                this.storedChunks.remove(i);
+                removeStoredOccurrencesEntry(fileID, chunk.getNr());
+                incSpaceAvailable(fileID, chunk.getNr());
+                iter.remove();
             }
         }
     }
