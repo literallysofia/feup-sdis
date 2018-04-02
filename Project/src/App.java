@@ -18,8 +18,8 @@ public class App {
             }
 
             String[] ipPeerID = args[0].split("/");
-            String host = ipPeerID[2];
-            String peerID = ipPeerID[3];
+            String host = ipPeerID[0];
+            String peerID = ipPeerID[1];
 
             Registry registry = LocateRegistry.getRegistry(host);
             RMIRemote peer = (RMIRemote) registry.lookup(peerID);

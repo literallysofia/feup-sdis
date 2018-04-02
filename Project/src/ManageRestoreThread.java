@@ -35,9 +35,7 @@ public class ManageRestoreThread implements Runnable {
             }
 
             List<String> sortedChunkKeys = new ArrayList<>(Peer.getStorage().getWantedChunks().keySet());
-            /*Collections.sort(sortedChunkKeys);
 
-            List<String> test = new ArrayList<>(Peer.getStorage().getWantedChunks().keySet());*/
             Collections.sort(sortedChunkKeys, (o1, o2) -> {
                 int chunkNr1 = Integer.valueOf(o1.split("_")[1]);
                 int chunkNr2 = Integer.valueOf(o2.split("_")[1]);
