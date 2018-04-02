@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-public class ManageReceivedMessageThread implements Runnable {
+public class ReceivedMessagesManagerThread implements Runnable {
 
     private byte[] msgBytes;
 
-    public ManageReceivedMessageThread(byte[] msgBytes) {
+    public ReceivedMessagesManagerThread(byte[] msgBytes) {
         this.msgBytes = msgBytes;
     }
 
@@ -34,7 +34,7 @@ public class ManageReceivedMessageThread implements Runnable {
                 manageRemoved();
                 break;
             case "PUTCHUNK":
-                managePutchunk();
+                managePutChunk();
                 break;
             case "CHUNK":
                 manageChunk();
@@ -42,7 +42,7 @@ public class ManageReceivedMessageThread implements Runnable {
         }
     }
 
-    private synchronized void managePutchunk() {
+    private synchronized void managePutChunk() {
 
         List<byte[]> headerAndBody = getHeaderAndBody();
         byte[] header = headerAndBody.get(0);
@@ -59,14 +59,14 @@ public class ManageReceivedMessageThread implements Runnable {
         int replicationDegree = Integer.parseInt(headerArray[5].trim());
 
         String key = fileId + "_" + chunkNr;
-        if (!Peer.getStorage().getStoredOccurrences().containsKey(key)) {
-            Peer.getStorage().getStoredOccurrences().put(key, 0);
+        if (!Peer.getStorage().getStoredOccurrences().containsKey(key)) { //if this chunk ins's in the current replication degrees table
+            Peer.getStorage().getStoredOccurrences().put(key, 0); //the chunk is added to that table
         }
 
-        if (Peer.getId() != senderId) {
+        if (Peer.getId() != senderId) { //if the peer who sent the message isnt the one who is receiving it
             Random random = new Random();
-            System.out.println("Received PUTCHUNK Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr + " replicationDegree: " + replicationDegree);
-            Peer.getExec().schedule(new PutchunkReceivedThread(version, fileId, chunkNr, replicationDegree, body), random.nextInt(401), TimeUnit.MILLISECONDS);
+            System.out.println("Received PUTCHUNK " + version + " " + senderId + " " + fileId + " " + chunkNr + " " + replicationDegree);
+            Peer.getExec().schedule(new ReceivedPutChunkThread(version, fileId, chunkNr, replicationDegree, body), random.nextInt(401), TimeUnit.MILLISECONDS);
         }
     }
 
@@ -85,9 +85,9 @@ public class ManageReceivedMessageThread implements Runnable {
         int chunkNr = Integer.parseInt(headerArray[4].trim());
 
 
-        if (Peer.getId() != senderId) {
-            Peer.getStorage().incStoredChunk(fileId, chunkNr);
-            System.out.println("Received STORED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
+        if (Peer.getId() != senderId) { //if the peer who sent the message isnt the one who is receiving it
+            Peer.getStorage().incStoredOccurrences(fileId, chunkNr); //increments the number of stored occurances of this chunk
+            System.out.println("Received STORED " + version + " " + senderId + " " + fileId + " " + chunkNr);
         }
     }
 
@@ -104,9 +104,9 @@ public class ManageReceivedMessageThread implements Runnable {
         int senderId = Integer.parseInt(headerArray[2].trim());
         String fileId = headerArray[3].trim();
 
-        if (Peer.getId() != senderId) {
+        if (Peer.getId() != senderId) { //if the peer who sent the message isnt the one who is receiving it
             Peer.getStorage().deleteStoredChunks(fileId);
-            System.out.println("Received DELETE Version: " + version + " SenderId: " + senderId + " fileId: " + fileId);
+            System.out.println("Received DELETE " + version + " " + senderId + " " + fileId);
         }
     }
 
@@ -124,10 +124,10 @@ public class ManageReceivedMessageThread implements Runnable {
         String fileId = headerArray[3].trim();
         int chunkNr = Integer.parseInt(headerArray[4].trim());
 
-        if (Peer.getId() != senderId) {
+        if (Peer.getId() != senderId) { //if the peer who sent the message isnt the one who is receiving it
             Random random = new Random();
-            System.out.println("Received GETCHUNK Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
-            Peer.getExec().schedule(new GetChunkReceivedThread(fileId, chunkNr), random.nextInt(401), TimeUnit.MILLISECONDS);
+            System.out.println("Received GETCHUNK " + version + " " + senderId + " " + fileId + " " + chunkNr);
+            Peer.getExec().schedule(new ReceivedGetChunkThread(fileId, chunkNr), random.nextInt(401), TimeUnit.MILLISECONDS);
         }
     }
 
@@ -146,7 +146,7 @@ public class ManageReceivedMessageThread implements Runnable {
         String fileId = headerArray[3].trim();
         int chunkNr = Integer.parseInt(headerArray[4].trim());
 
-        if (Peer.getId() != senderId) {
+        if (Peer.getId() != senderId) { //if the peer who sent the message isnt the one who is receiving it
             Chunk chunk = new Chunk(chunkNr, fileId, 0, 0);
             Peer.getStorage().getReceivedChunks().add(chunk);
 
@@ -154,27 +154,8 @@ public class ManageReceivedMessageThread implements Runnable {
                 Peer.getStorage().setWantedChunkReceived(fileId, chunkNr);
                 storeRestoredChunks(fileId, chunkNr, body);
             }
-            System.out.println("Received CHUNK Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
+            System.out.println("Received CHUNK " + version + " " + senderId + " " + fileId + " " + chunkNr);
         }
-    }
-
-    private List<byte[]> getHeaderAndBody() {
-
-        int i;
-        for (i = 0; i < this.msgBytes.length - 4; i++) {
-            if (this.msgBytes[i] == 0xD && this.msgBytes[i + 1] == 0xA && this.msgBytes[i + 2] == 0xD && this.msgBytes[i + 3] == 0xA) {
-                break;
-            }
-        }
-        byte[] header = Arrays.copyOfRange(this.msgBytes, 0, i);
-        byte[] body = Arrays.copyOfRange(this.msgBytes, i + 4, this.msgBytes.length);
-
-        List<byte[]> headerAndBody = new ArrayList<>();
-
-        headerAndBody.add(header);
-        headerAndBody.add(body);
-
-        return headerAndBody;
     }
 
     private void manageRemoved() {
@@ -191,11 +172,11 @@ public class ManageReceivedMessageThread implements Runnable {
         String fileId = headerArray[3].trim();
         int chunkNr = Integer.parseInt(headerArray[4].trim());
 
-        if (Peer.getId() != senderId) {
-            Peer.getStorage().decStoredChunk(fileId, chunkNr);
-            System.out.println("Received REMOVED Version: " + version + " SenderId: " + senderId + " fileId: " + fileId + " chunkNr: " + chunkNr);
+        if (Peer.getId() != senderId) {  //if the peer who sent the message isnt the one who is receiving it
+            Peer.getStorage().decStoredOccurrences(fileId, chunkNr); //decrements de current replication degree of this chunk
+            System.out.println("Received REMOVED " + version + " " + senderId + " " + fileId + " " + chunkNr);
             Random random = new Random();
-            Peer.getExec().schedule(new RemovedReceivedMessageThread(fileId, chunkNr), random.nextInt(401), TimeUnit.MILLISECONDS);
+            Peer.getExec().schedule(new ReceivedRemovedMessageThread(fileId, chunkNr), random.nextInt(401), TimeUnit.MILLISECONDS);
         }
     }
 
@@ -217,5 +198,24 @@ public class ManageReceivedMessageThread implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private List<byte[]> getHeaderAndBody() {
+
+        int i;
+        for (i = 0; i < this.msgBytes.length - 4; i++) {
+            if (this.msgBytes[i] == 0xD && this.msgBytes[i + 1] == 0xA && this.msgBytes[i + 2] == 0xD && this.msgBytes[i + 3] == 0xA) {
+                break;
+            }
+        }
+        byte[] header = Arrays.copyOfRange(this.msgBytes, 0, i);
+        byte[] body = Arrays.copyOfRange(this.msgBytes, i + 4, this.msgBytes.length);
+
+        List<byte[]> headerAndBody = new ArrayList<>();
+
+        headerAndBody.add(header);
+        headerAndBody.add(body);
+
+        return headerAndBody;
     }
 }

@@ -32,7 +32,9 @@ public class Storage implements java.io.Serializable{
      * hasReceived = if received (true) if not (false)
      */
     private ConcurrentHashMap<String, String> wantedChunks;
-
+    /*
+     * Space available to store other peers' chunks
+     */
     private int spaceAvailable;
 
     public Storage() {
@@ -78,47 +80,6 @@ public class Storage implements java.io.Serializable{
         return true;
     }
 
-    public void deleteReceivedChunk(Chunk chunk) {
-        for (int i = 0; i < this.receivedChunks.size(); i++) {
-            if (this.receivedChunks.get(i).getFileID().equals(chunk.getFileID()) && this.storedChunks.get(i).getNr() == chunk.getNr())
-                this.receivedChunks.remove(i);
-        }
-    }
-
-    public synchronized void incStoredChunk(String fileID, int chunkNr) {
-
-        String key = fileID + '_' + chunkNr;
-
-        if (!Peer.getStorage().getStoredOccurrences().containsKey(key)) {
-            Peer.getStorage().getStoredOccurrences().put(key, 1);
-        } else {
-            int total = this.storedOccurrences.get(key) + 1;
-            this.storedOccurrences.replace(key, total);
-        }
-
-    }
-
-    public synchronized void decStoredChunk(String fileID, int chunkNr) {
-        String key = fileID + '_' + chunkNr;
-        int total = this.storedOccurrences.get(key) - 1;
-        this.storedOccurrences.replace(key, total);
-    }
-
-    public synchronized void removeStoredOccurrencesEntry(String fileID, int chunkNr){
-        String key = fileID + '_' + chunkNr;
-        this.storedOccurrences.remove(key);
-    }
-
-    public void addWantedChunk(String fileID, int chunkNr) {
-        String key = fileID + '_' + chunkNr;
-        this.wantedChunks.put(key, "false");
-    }
-
-    public void setWantedChunkReceived(String fileID, int chunkNr) {
-        String key = fileID + '_' + chunkNr;
-        this.wantedChunks.replace(key, "true");
-    }
-
     public void deleteStoredChunks(String fileID) {
         for (Iterator<Chunk> iter = this.storedChunks.iterator(); iter.hasNext(); ) {
             Chunk chunk = iter.next();
@@ -133,6 +94,31 @@ public class Storage implements java.io.Serializable{
         }
     }
 
+    public synchronized void incStoredOccurrences(String fileID, int chunkNr) {
+
+        String key = fileID + '_' + chunkNr;
+
+        if (!Peer.getStorage().getStoredOccurrences().containsKey(key)) {
+            Peer.getStorage().getStoredOccurrences().put(key, 1);
+        } else {
+            int total = this.storedOccurrences.get(key) + 1;
+            this.storedOccurrences.replace(key, total);
+        }
+
+    }
+
+    public synchronized void decStoredOccurrences(String fileID, int chunkNr) {
+        String key = fileID + '_' + chunkNr;
+        int total = this.storedOccurrences.get(key) - 1;
+        this.storedOccurrences.replace(key, total);
+    }
+
+    public synchronized void removeStoredOccurrencesEntry(String fileID, int chunkNr){
+        String key = fileID + '_' + chunkNr;
+        this.storedOccurrences.remove(key);
+    }
+
+    //for every stored chunk, gets his currents replication degree from the stored occurences table
     public void fillCurrRDChunks() {
         for (Chunk storedChunk : this.storedChunks) {
             String key = storedChunk.getFileID() + "_" + storedChunk.getNr();
@@ -140,14 +126,23 @@ public class Storage implements java.io.Serializable{
         }
     }
 
+    public void addWantedChunk(String fileID, int chunkNr) {
+        String key = fileID + '_' + chunkNr;
+        this.wantedChunks.put(key, "false");
+    }
+
+    public void setWantedChunkReceived(String fileID, int chunkNr) {
+        String key = fileID + '_' + chunkNr;
+        this.wantedChunks.replace(key, "true");
+    }
+
+
     public synchronized int getSpaceAvailable() {
         return this.spaceAvailable;
     }
 
     public synchronized void setSpaceAvailable(int spaceAvailable) {
-        System.out.println("OLD SPACE AVAILABLE: " + this.spaceAvailable);
         this.spaceAvailable = spaceAvailable;
-        System.out.println("NEW SPACE AVAILABLE: " + this.spaceAvailable);
     }
 
     public synchronized void decSpaceAvailable(int chunkSize){
@@ -155,12 +150,10 @@ public class Storage implements java.io.Serializable{
     }
 
     public synchronized void incSpaceAvailable(String fileId, int chunkNr){
-
         for (Chunk storedChunk : this.storedChunks) {
             if (storedChunk.getFileID().equals(fileId) && storedChunk.getNr() == chunkNr)
                 this.spaceAvailable = this.spaceAvailable + storedChunk.getSize();
         }
-
     }
 
     public synchronized int getOccupiedSpace(){
@@ -171,13 +164,5 @@ public class Storage implements java.io.Serializable{
         return occupiedSpace;
     }
 
-    public synchronized void removeStoredChunk(Chunk chunk){
-        for (int i = 0; i < this.storedChunks.size(); i++) {
-            if (this.storedChunks.get(i).getFileID().equals(chunk.getFileID()) && this.storedChunks.get(i).getNr() == chunk.getNr()){
-                this.storedChunks.remove(i);
-                break;
-            }
-        }
-    }
 
 }

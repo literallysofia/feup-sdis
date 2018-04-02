@@ -3,14 +3,16 @@ import java.net.*;
 import java.util.Arrays;
 
 public class ChannelControl implements Runnable {
-    private final String INET_ADDR = "224.0.0.15";
-    private int PORT = 8001;
+    private String INET_ADDR;
+    private int PORT;
     private InetAddress address;
 
 
-    public ChannelControl() {
+    public ChannelControl(String INETaddress, int port) {
         //Get the address that we are going to connect to.
         try {
+            INET_ADDR = INETaddress;
+            PORT = port;
             address = InetAddress.getByName(INET_ADDR);
         } catch (UnknownHostException e) {
             e.printStackTrace();

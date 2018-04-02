@@ -3,14 +3,16 @@ import java.net.*;
 import java.util.Arrays;
 
 public class ChannelBackup implements Runnable {
-    private final String INET_ADDR = "224.0.0.16";
-    private int PORT = 8002;
+    private String INET_ADDR;
+    private int PORT;
     private InetAddress address;
 
 
-    public ChannelBackup() {
+    public ChannelBackup(String INETaddress, int port) {
         //Get the address that we are going to connect to.
         try {
+            INET_ADDR = INETaddress;
+            PORT = port;
             address = InetAddress.getByName(INET_ADDR);
         } catch (UnknownHostException e) {
             e.printStackTrace();

@@ -11,7 +11,7 @@ class App {
 
 
             if (args.length > 4) {
-                System.out.println("ERROR: App format must be: App <peer_ap> <sub_protocol> <opnd_1> <opnd_2>");
+                System.out.println("ERROR: App format must be: App <host>/<peer_access_point> <sub_protocol> <opnd_1> <opnd_2>");
                 return;
             }
 

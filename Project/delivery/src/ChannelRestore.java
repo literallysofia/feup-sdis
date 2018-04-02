@@ -3,13 +3,15 @@ import java.net.*;
 import java.util.Arrays;
 
 public class ChannelRestore implements Runnable {
-    private final String INET_ADDR = "224.0.0.17";
-    private int PORT = 8003;
+    private String INET_ADDR;
+    private int PORT;
     private InetAddress address;
 
-    public ChannelRestore() {
+    public ChannelRestore(String INETaddress, int port) {
         //Get the address that we are going to connect to.
         try {
+            INET_ADDR = INETaddress;
+            PORT = port;
             address = InetAddress.getByName(INET_ADDR);
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -56,7 +58,7 @@ public class ChannelRestore implements Runnable {
                 receiverSocket.receive(msgPacket);
 
                 byte[] bufferCopy = Arrays.copyOf(buf, msgPacket.getLength());
-                Peer.getExec().execute(new ManageReceivedMessageThread(bufferCopy));
+                Peer.getExec().execute(new ReceivedMessagesManagerThread(bufferCopy));
             }
         } catch (IOException ex) {
             ex.printStackTrace();

@@ -1,13 +1,13 @@
 import java.util.concurrent.TimeUnit;
 
-public class PutChunkManager implements Runnable {
+public class ManagePutChunkThread implements Runnable {
     private byte[] message;
     private int time;
     private String key;
     private int replicationDegree;
     private int counter;
 
-    public PutChunkManager(byte[] message, int time, String fileID, int chunkNr, int replicationDegree) {
+    public ManagePutChunkThread(byte[] message, int time, String fileID, int chunkNr, int replicationDegree) {
         this.message = message;
         this.time = time;
         this.key = fileID + '_' + chunkNr;
@@ -20,10 +20,10 @@ public class PutChunkManager implements Runnable {
 
         int occurrences = Peer.getStorage().getStoredOccurrences().get(this.key);
 
-        if (occurrences < replicationDegree) {
+        if (occurrences < replicationDegree) { //if the replication degree isn't the desired one
 
             Peer.getMDB().sendMessage(message);
-            System.out.println("Sent PUTCHUNK");
+            System.out.println("Sent PUTCHUNK try: " + counter);
             this.time = 2 * this.time;
             this.counter++;
 

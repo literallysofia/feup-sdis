@@ -10,18 +10,19 @@ import java.util.concurrent.TimeUnit;
 public class Peer implements RMIRemote {
 
     private static int id;
+    private static double version;
+
     private static ChannelControl MC;
     private static ChannelBackup MDB;
     private static ChannelRestore MDR;
     private static ScheduledThreadPoolExecutor exec;
     private static Storage storage;
-    private static double version;
 
-    private Peer() {
+    private Peer(String MCAddress, int MCPort, String MDBAddress, int MDBPort, String MDRAddress, int MDRPort) {
         exec = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(250);
-        MC = new ChannelControl();
-        MDB = new ChannelBackup();
-        MDR = new ChannelRestore();
+        MC = new ChannelControl(MCAddress, MCPort);
+        MDB = new ChannelBackup(MDBAddress, MDBPort);
+        MDR = new ChannelRestore(MDRAddress, MDRPort);
     }
 
     public static int getId() {
@@ -53,14 +54,28 @@ public class Peer implements RMIRemote {
         System.setProperty("java.net.preferIPv4Stack", "true");
 
         try {
-            Peer obj = new Peer();
-            id = Integer.parseInt(args[1]);
+
+            if(args.length != 9){
+                System.out.println("ERROR: Peer format must be: Peer <version> <server id> <access_point> <MC_IP_address> <MC_port> <MDB_IP_address> <MDB_port> <MDR_IP_address> <MDR_port>");
+                return;
+            }
+
             version = Double.parseDouble(args[0]);
+            id = Integer.parseInt(args[1]);
+            String accessP = args[2];
+            String MCAddress = args[3];
+            int MCPort = Integer.parseInt(args[4]);
+            String MDBAddress = args[5];
+            int MDBPort = Integer.parseInt(args[6]);
+            String MDRAddress = args[7];
+            int MDRPort = Integer.parseInt(args[8]);
+
+            Peer obj = new Peer(MCAddress,MCPort, MDBAddress,MDBPort, MDRAddress, MDRPort);
             RMIRemote stub = (RMIRemote) UnicastRemoteObject.exportObject(obj, 0);
 
             // Bind the remote object's stub in the registry
             Registry registry = LocateRegistry.getRegistry();
-            registry.bind(args[1], stub);
+            registry.bind(accessP, stub);
 
             System.err.println("Peer ready");
         } catch (Exception e) {
